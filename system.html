@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B.P.R.D. Records Terminal | Field Office Toronto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="terminal.css">
+</head>
+<body>
+  <div class="terminal">
+
+    <header>
+      <div class="title-bar">
+        <img src="images/bprd-seal.svg" alt="Circular seal of the Bureau for Paranormal Research and Defense, Extraterrestrial Division, with a five-pointed star at its centre">
+        <div>
+          <h1>B.P.R.D. Records Terminal</h1>
+          <p class="system-line">System v4.2 &bull; Field Office Toronto &bull; Secure line</p>
+        </div>
+      </div>
+    </header>
+
+    <nav aria-label="Terminal navigation">
+      <ul>
+        <li><a href="system.html" aria-current="page">Terminal</a></li>
+        <li><a href="index.html">XT-1026 Public Brief</a></li>
+        <li><a href="classified.html">XT-1026 Classified Annex</a></li>
+      </ul>
+    </nav>
+
+    <main>
+
+      <section class="panel" id="boot">
+        <h2>System Start</h2>
+        <ul class="boot-log">
+          <li>Loading B.P.R.D. records system v4.2 &hellip; <span class="status-ok">[ OK ]</span></li>
+          <li>Opening secure line to Field Office Toronto &hellip; <span class="status-ok">[ OK ]</span></li>
+          <li>Indexing case files (6 records found) &hellip; <span class="status-ok">[ OK ]</span></li>
+          <li>Proxima Centauri flare watch &hellip; <span class="status-ok">[ NOMINAL ]</span></li>
+          <li>All terminal activity is recorded &hellip; <span class="status-warn">[ NOTICE ]</span></li>
+          <li>Awaiting agent authentication <span class="cursor" aria-hidden="true"></span></li>
+        </ul>
+      </section>
+
+      <section class="panel" id="login">
+        <h2>Agent Authentication</h2>
+        <div class="login-grid">
+          <form action="index.html" method="get" autocomplete="off">
+            <div class="field">
+              <label for="agent-id">Agent ID</label>
+              <input type="text" id="agent-id" placeholder="e.g. TOR-0417">
+            </div>
+            <div class="field">
+              <label for="passphrase">Passphrase</label>
+              <input type="password" id="passphrase" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;">
+            </div>
+            <button type="submit">AUTHENTICATE &gt;</button>
+          </form>
+          <div class="login-notice">
+            <p>NOTICE: This terminal is restricted to Bureau personnel. Every login attempt is logged and reviewed.</p>
+            <p>Any passphrase is currently accepted. A security upgrade was requested in 1987 and remains under review.</p>
+            <p>Agents in training may leave both fields blank.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="directory">
+        <h2>Case Directory</h2>
+        <div class="table-wrap">
+          <table>
+            <caption>Field Office Toronto &bull; Records visible at current clearance</caption>
+            <thead>
+              <tr>
+                <th scope="col">Case No.</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Division</th>
+                <th scope="col">Status</th>
+                <th scope="col">Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="active-case">
+                <td>XT-1026</td>
+                <td>The Twilight Engineer</td>
+                <td>Extraterrestrial</td>
+                <td>Active &mdash; under observation</td>
+                <td><a class="open-link" href="index.html">OPEN FILE &gt;</a></td>
+              </tr>
+              <tr class="active-case">
+                <td>XT-1026-A</td>
+                <td>The Twilight Engineer: Classified Annex</td>
+                <td>Extraterrestrial</td>
+                <td>Level 5 only</td>
+                <td><a class="open-link" href="classified.html">OPEN ANNEX &gt;</a></td>
+              </tr>
+              <tr>
+                <td>XT-0301</td>
+                <td>Lights over Lake Ontario</td>
+                <td>Extraterrestrial</td>
+                <td>Unresolved</td>
+                <td class="denied">ACCESS DENIED</td>
+              </tr>
+              <tr>
+                <td>PN-0457</td>
+                <td>The Bloor Line Echo</td>
+                <td>Paranormal</td>
+                <td>Under review</td>
+                <td class="denied">ACCESS DENIED</td>
+              </tr>
+              <tr>
+                <td>PN-0213</td>
+                <td>The stairwell with an extra step on Thursdays</td>
+                <td>Paranormal</td>
+                <td>Closed, unsolved</td>
+                <td class="denied">ARCHIVED</td>
+              </tr>
+              <tr>
+                <td>XT-0988</td>
+                <td><span class="redact">██████ ████</span></td>
+                <td><span class="redact">████████</span></td>
+                <td>Sealed</td>
+                <td class="denied">ACCESS DENIED</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <p>Bureau for Paranormal Research and Defense &bull; Internal use only &bull; Do not leave this terminal unattended.</p>
+      <p>A fictional system created for DG8002 Activity 6, Master of Digital Media, Toronto Metropolitan University.</p>
+    </footer>
+
+  </div>
+</body>
+</html>
