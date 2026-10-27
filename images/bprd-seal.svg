@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Bureau seal">
+  <defs>
+    <path id="top-arc" d="M 30,100 A 70,70 0 0 1 170,100"/>
+    <path id="bottom-arc" d="M 26,100 A 74,74 0 0 0 174,100"/>
+  </defs>
+  <circle cx="100" cy="100" r="96" fill="#1f1c17"/>
+  <circle cx="100" cy="100" r="90" fill="none" stroke="#e8dfc7" stroke-width="2"/>
+  <circle cx="100" cy="100" r="56" fill="none" stroke="#e8dfc7" stroke-width="1.5"/>
+  <text font-family="Courier New, monospace" font-size="12.5" font-weight="bold" fill="#e8dfc7" letter-spacing="1.5">
+    <textPath href="#top-arc" startOffset="50%" text-anchor="middle">PARANORMAL RESEARCH</textPath>
+  </text>
+  <text font-family="Courier New, monospace" font-size="12.5" font-weight="bold" fill="#e8dfc7" letter-spacing="1.5">
+    <textPath href="#bottom-arc" startOffset="50%" text-anchor="middle" dominant-baseline="hanging">AND DEFENSE · XT DIV</textPath>
+  </text>
+  <polygon points="100,58 110,88 142,88 116,106 126,136 100,118 74,136 84,106 58,88 90,88" fill="#a8231b"/>
+  <circle cx="100" cy="100" r="7" fill="#1f1c17"/>
+  <circle cx="22" cy="100" r="3" fill="#a8231b"/>
+  <circle cx="178" cy="100" r="3" fill="#a8231b"/>
+</svg>

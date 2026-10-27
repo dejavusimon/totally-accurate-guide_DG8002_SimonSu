@@ -1,0 +1,305 @@
+/* B.P.R.D. Case File XT-1026 — light dossier styling.
+   Structure lives in the HTML; this file only adds the paper-file look. */
+
+:root {
+  --paper: #f1ead8;
+  --paper-edge: #e4dbc3;
+  --ink: #1f1c17;
+  --ink-soft: #5a5347;
+  --stamp: #a8231b;
+  --rule: #b9ae93;
+  --redact: #141310;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #2b2925;
+  color: var(--ink);
+  font-family: "Courier Prime", "Courier New", Courier, monospace;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* The sheet of paper */
+.dossier {
+  max-width: 860px;
+  margin: 32px auto;
+  padding: 40px 48px;
+  background: var(--paper);
+  box-shadow: 0 0 0 1px var(--paper-edge), 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- Header ---------- */
+header {
+  border-bottom: 3px double var(--ink);
+  padding-bottom: 20px;
+  margin-bottom: 8px;
+}
+
+.letterhead {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.letterhead img {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+}
+
+.agency {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+h1 {
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 2rem;
+  line-height: 1.2;
+  margin: 4px 0 6px;
+}
+
+.file-no {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Rubber stamps */
+.stamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.stamp {
+  display: inline-block;
+  border: 3px solid var(--stamp);
+  color: var(--stamp);
+  padding: 4px 12px;
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-3deg);
+  opacity: 0.85;
+}
+
+.stamp:nth-child(2) { transform: rotate(2deg); }
+.stamp:nth-child(3) { transform: rotate(-1deg); }
+
+/* ---------- Navigation ---------- */
+nav {
+  border-bottom: 1px solid var(--rule);
+  padding: 10px 0;
+  margin-bottom: 24px;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+nav a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--ink-soft);
+}
+
+nav a:hover,
+nav a[aria-current="page"] {
+  color: var(--stamp);
+  border-bottom-color: var(--stamp);
+}
+
+/* ---------- Body content ---------- */
+h2 {
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 4px;
+  margin-top: 36px;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin-bottom: 4px;
+}
+
+a { color: var(--stamp); }
+
+/* Redaction bars: hover (or tap) to declassify */
+.redacted {
+  background: var(--redact);
+  color: var(--redact);
+  padding: 0 4px;
+  border-radius: 1px;
+  cursor: help;
+  transition: color 0.2s, background 0.2s;
+}
+
+.redacted:hover,
+.redacted:focus {
+  background: #d9cfb3;
+  color: var(--ink);
+  outline: none;
+}
+
+/* Subject identification card */
+.subject-card {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 20px;
+  border: 1px solid var(--ink);
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.subject-card dt {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  padding-top: 2px;
+}
+
+.subject-card dd { margin: 0; }
+
+/* Photographs */
+figure {
+  margin: 24px 0;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  transform: rotate(-0.6deg);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+figcaption {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-top: 8px;
+}
+
+/* Threat assessment table */
+.threat-assessment {
+  border: 2px solid var(--ink);
+  padding: 4px 20px 16px;
+  margin-top: 36px;
+}
+
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+caption {
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  padding-bottom: 8px;
+}
+
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 6px 10px 6px 0;
+  border-bottom: 1px dotted var(--rule);
+}
+
+th { text-transform: uppercase; font-size: 0.8rem; }
+
+.bar { white-space: nowrap; letter-spacing: -1px; }
+
+.verdict {
+  font-family: "Special Elite", "Courier New", monospace;
+  color: var(--stamp);
+  font-size: 1.1rem;
+  margin-bottom: 0;
+}
+
+/* Analyst theories */
+.theories {
+  display: grid;
+  gap: 16px;
+}
+
+.theory {
+  border-left: 4px solid var(--rule);
+  padding: 4px 0 4px 16px;
+}
+
+/* Clearance gate link */
+.clearance-gate {
+  margin: 40px 0 8px;
+  padding: 18px 20px;
+  border: 2px dashed var(--stamp);
+  text-align: center;
+}
+
+.clearance-gate a {
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 1.15rem;
+}
+
+/* Access banner on the classified page */
+.access-banner {
+  background: var(--redact);
+  color: var(--paper);
+  padding: 12px 16px;
+  font-size: 0.95rem;
+}
+
+.access-banner p { margin: 0; }
+
+/* Footnotes */
+.field-notes {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.field-notes h2 { font-size: 1rem; }
+
+sup a { text-decoration: none; }
+
+/* ---------- Footer ---------- */
+footer {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 3px double var(--ink);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+footer p { margin: 4px 0; }
+
+/* ---------- Small screens ---------- */
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .dossier { margin: 0; padding: 24px 16px; }
+  .letterhead { flex-direction: column; align-items: flex-start; }
+  h1 { font-size: 1.6rem; }
+  .subject-card { grid-template-columns: 1fr; }
+  .subject-card dd { margin-bottom: 8px; }
+}
