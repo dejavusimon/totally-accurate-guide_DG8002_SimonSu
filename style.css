@@ -22,13 +22,33 @@ body {
   line-height: 1.6;
 }
 
-/* The sheet of paper */
+/* The sheet of paper, sitting on a small stack of pages.
+   Each pair of offset shadows draws one sheet edge peeking out underneath. */
 .dossier {
+  position: relative;
   max-width: 860px;
-  margin: 32px auto;
+  margin: 32px auto 44px;
   padding: 40px 48px;
   background: var(--paper);
-  box-shadow: 0 0 0 1px var(--paper-edge), 0 18px 40px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 0 0 1px var(--paper-edge),
+    5px 6px 0 -1px #e6dec7,
+    5px 6px 0 0 var(--rule),
+    10px 12px 0 -1px #dad1b7,
+    10px 12px 0 0 #a39878,
+    0 22px 44px rgba(0, 0, 0, 0.5);
+}
+
+/* "Page 1 of 2" marker in the top-right corner of each sheet */
+.page-no {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
 /* ---------- Header ---------- */
@@ -198,8 +218,8 @@ figcaption {
   margin-top: 8px;
 }
 
-/* Threat assessment table */
-.threat-assessment {
+/* Threat assessment table (ID selector: one unique panel on the Public Brief) */
+#threat {
   border: 2px solid var(--ink);
   padding: 4px 20px 16px;
   margin-top: 36px;
@@ -262,15 +282,18 @@ th { text-transform: uppercase; font-size: 0.8rem; }
   font-size: 1.15rem;
 }
 
-/* Access banner on the classified page */
-.access-banner {
+/* Access banner (ID selector: appears once, on the Classified Annex) */
+#access-banner {
   background: var(--redact);
   color: var(--paper);
   padding: 12px 16px;
   font-size: 0.95rem;
 }
 
-.access-banner p { margin: 0; }
+#access-banner p { margin: 0; }
+
+/* Page-specific touches, keyed off each page's <body> ID */
+#page-classified .page-no { color: var(--stamp); }
 
 /* Footnotes */
 .field-notes {
@@ -294,10 +317,96 @@ footer {
 
 footer p { margin: 4px 0; }
 
+/* ---------- Page-flip transition between the two dossier pages ----------
+   Pure CSS cross-document View Transitions. Both dossier pages load this
+   stylesheet, so moving between them animates; the Records Terminal does
+   not opt in, so arriving from it stays instant. Browsers without support
+   (currently Firefox) simply switch pages with no animation.
+
+   Forward (Brief -> Classified): the Brief slides off the top of the pile.
+   Back (Classified -> Brief): the Brief slides back onto the pile.        */
+
+@view-transition {
+  navigation: auto;
+}
+
+:root {
+  /* Limits the moving snapshot to the paper column (plus a soft edge that
+     reads as a cast shadow), so the dark desk around it stays put. */
+  --sheet-mask: linear-gradient(
+    to right,
+    transparent calc(50% - 472px),
+    #000 calc(50% - 436px),
+    #000 calc(50% + 446px),
+    transparent calc(50% + 482px)
+  );
+}
+
+/* Forward: arriving on the Classified Annex */
+:root:has(#page-classified)::view-transition-old(root) {
+  z-index: 2;
+  -webkit-mask-image: var(--sheet-mask);
+  mask-image: var(--sheet-mask);
+  transform-origin: 20% 100%;
+  animation: sheet-off 0.7s cubic-bezier(0.55, 0.05, 0.7, 0.4) both;
+}
+
+:root:has(#page-classified)::view-transition-new(root) {
+  animation: sheet-uncover 0.7s ease-out both;
+}
+
+/* Back: arriving on the Public Brief */
+:root:has(#page-brief)::view-transition-new(root) {
+  z-index: 2;
+  -webkit-mask-image: var(--sheet-mask);
+  mask-image: var(--sheet-mask);
+  transform-origin: 20% 100%;
+  animation: sheet-on 0.7s cubic-bezier(0.2, 0.65, 0.3, 1) both;
+}
+
+:root:has(#page-brief)::view-transition-old(root) {
+  animation: sheet-cover 0.7s ease-in both;
+}
+
+@keyframes sheet-off {
+  from { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  85%  { opacity: 1; }
+  to   { transform: translate(72vw, -28vh) rotate(9deg); opacity: 0; }
+}
+
+@keyframes sheet-on {
+  from { transform: translate(72vw, -28vh) rotate(9deg); opacity: 0; }
+  15%  { opacity: 1; }
+  to   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+}
+
+/* The page underneath sits in the top sheet's shadow until it is uncovered */
+@keyframes sheet-uncover {
+  from { filter: brightness(0.78); }
+  to   { filter: brightness(1); }
+}
+
+@keyframes sheet-cover {
+  from { filter: brightness(1); }
+  to   { filter: brightness(0.78); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
 /* ---------- Small screens ---------- */
 @media (max-width: 640px) {
   body { font-size: 16px; }
-  .dossier { margin: 0; padding: 24px 16px; }
+  .dossier {
+    margin: 0;
+    padding: 36px 16px 24px;
+    box-shadow: none;
+  }
+  .page-no { top: 10px; right: 16px; }
   .letterhead { flex-direction: column; align-items: flex-start; }
   h1 { font-size: 1.6rem; }
   .subject-card { grid-template-columns: 1fr; }
