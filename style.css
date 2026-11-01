@@ -1,110 +1,170 @@
-/* B.P.R.D. Case File XT-1026 — light dossier styling.
-   Structure lives in the HTML; this file only adds the paper-file look. */
+/* =====================================================================
+   B.P.R.D. Case File XT-1026 — clipboard dossier
+   Shared by index.html (Public Brief) and classified.html (Annex).
+
+   1. Tokens and base type
+   2. Paper sheets and their content (works everywhere)
+   3. Clipboard mode: board, clip, scroll-to-flip (desktop/tablet,
+      browsers with scroll-driven animations)
+   4. Page turn between the two files (View Transitions)
+   5. Reduced motion
+   ===================================================================== */
+
+
+/* ---------- 1. Tokens and base type ---------- */
 
 :root {
-  --paper: #f1ead8;
+  --desk: #2b2925;
+  --paper: #f3ecda;
   --paper-edge: #e4dbc3;
   --ink: #1f1c17;
   --ink-soft: #5a5347;
   --stamp: #a8231b;
   --rule: #b9ae93;
   --redact: #141310;
+  --board: #8b5a2b;
+  --board-dark: #5e3a18;
+  --metal-light: #e9ecef;
+  --metal-dark: #8d939a;
 }
 
 * { box-sizing: border-box; }
 
+html { background: var(--desk); }
+
 body {
   margin: 0;
-  background: #2b2925;
   color: var(--ink);
+  background:
+    radial-gradient(ellipse at 50% 40%, #37332d 0%, var(--desk) 70%);
+  min-height: 100vh;
   font-family: "Courier Prime", "Courier New", Courier, monospace;
-  font-size: 17px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
-/* The sheet of paper, sitting on a small stack of pages.
-   Each pair of offset shadows draws one sheet edge peeking out underneath. */
-.dossier {
+h1, h2, .stamp, .verdict, .clearance-gate a {
+  font-family: "Special Elite", "Courier New", monospace;
+  font-weight: normal;
+}
+
+a { color: var(--stamp); }
+
+
+/* ---------- 2. Paper sheets and their content ----------
+   Default (phones, Firefox): sheets sit one after another down the page
+   like papers laid out on a desk, and the page scrolls normally. */
+
+.board,
+.clip,
+.track { display: none; }
+
+.board-nav {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.board-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+}
+
+.board-nav a {
+  color: var(--paper);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(243, 236, 218, 0.5);
+}
+
+.board-nav a:hover,
+.board-nav a:focus,
+.board-nav a[aria-current="page"] {
+  color: #ffd9a0;
+  border-bottom-color: #ffd9a0;
+}
+
+.stack {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+
+/* One sheet of paper */
+.sheet {
   position: relative;
-  max-width: 860px;
-  margin: 32px auto 44px;
-  padding: 40px 48px;
+  margin: 0 0 20px;
+  padding: 40px 22px 26px;
   background: var(--paper);
-  box-shadow:
-    0 0 0 1px var(--paper-edge),
-    5px 6px 0 -1px #e6dec7,
-    5px 6px 0 0 var(--rule),
-    10px 12px 0 -1px #dad1b7,
-    10px 12px 0 0 #a39878,
-    0 22px 44px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 1px var(--paper-edge), 0 10px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* "Page 1 of 2" marker in the top-right corner of each sheet */
 .page-no {
   position: absolute;
-  top: 12px;
-  right: 18px;
+  top: 0.9em;
+  right: 1.2em;
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.72em;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
 
-/* ---------- Header ---------- */
+#page-classified .page-no { color: var(--stamp); }
+
+/* Letterhead (cover sheet of each file) */
 header {
   border-bottom: 3px double var(--ink);
-  padding-bottom: 20px;
-  margin-bottom: 8px;
+  padding-bottom: 0.9em;
 }
 
 .letterhead {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 1em;
 }
 
 .letterhead img {
-  width: 96px;
-  height: 96px;
+  width: 4.6em;
+  height: 4.6em;
   flex-shrink: 0;
 }
 
 .agency {
   margin: 0;
-  font-size: 0.85rem;
-  letter-spacing: 0.18em;
+  font-size: 0.72em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
 
 h1 {
-  font-family: "Special Elite", "Courier New", monospace;
-  font-size: 2rem;
-  line-height: 1.2;
-  margin: 4px 0 6px;
+  font-size: 1.75em;
+  line-height: 1.15;
+  margin: 0.15em 0 0.25em;
 }
 
 .file-no {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.85em;
 }
 
-/* Rubber stamps */
 .stamps {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 0.6em;
+  margin-top: 0.9em;
 }
 
 .stamp {
   display: inline-block;
-  border: 3px solid var(--stamp);
+  border: 0.17em solid var(--stamp);
   color: var(--stamp);
-  padding: 4px 12px;
-  font-family: "Special Elite", "Courier New", monospace;
-  font-size: 0.95rem;
+  padding: 0.15em 0.6em;
+  font-size: 0.85em;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transform: rotate(-3deg);
@@ -114,58 +174,40 @@ h1 {
 .stamp:nth-child(2) { transform: rotate(2deg); }
 .stamp:nth-child(3) { transform: rotate(-1deg); }
 
-/* ---------- Navigation ---------- */
-nav {
-  border-bottom: 1px solid var(--rule);
-  padding: 10px 0;
-  margin-bottom: 24px;
-}
-
-nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-}
-
-nav a {
-  color: var(--ink);
-  text-decoration: none;
-  border-bottom: 1px dashed var(--ink-soft);
-}
-
-nav a:hover,
-nav a[aria-current="page"] {
-  color: var(--stamp);
-  border-bottom-color: var(--stamp);
-}
-
-/* ---------- Body content ---------- */
 h2 {
-  font-family: "Special Elite", "Courier New", monospace;
-  font-size: 1.3rem;
+  font-size: 1.2em;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   border-bottom: 1px solid var(--rule);
-  padding-bottom: 4px;
-  margin-top: 36px;
+  padding-bottom: 0.2em;
+  margin: 1.1em 0 0.6em;
+}
+
+.sheet > h2:first-of-type { margin-top: 0.4em; }
+header + h2,
+#access-banner + h2 { margin-top: 1em !important; }
+
+.cont {
+  font-size: 0.7em;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
 }
 
 h3 {
-  font-size: 1.05rem;
-  margin-bottom: 4px;
+  font-size: 1em;
+  margin: 1em 0 0.25em;
 }
 
-a { color: var(--stamp); }
+p { margin: 0 0 0.75em; }
 
-/* Redaction bars: hover (or tap) to declassify */
+ul, ol { margin: 0 0 0.75em; padding-left: 1.4em; }
+li { margin-bottom: 0.45em; }
+
+/* Redaction bars: hover or tab to declassify */
 .redacted {
   background: var(--redact);
   color: var(--redact);
-  padding: 0 4px;
-  border-radius: 1px;
+  padding: 0 0.25em;
   cursor: help;
   transition: color 0.2s, background 0.2s;
 }
@@ -177,33 +219,34 @@ a { color: var(--stamp); }
   outline: none;
 }
 
-/* Subject identification card */
+/* Subject ID card: a boxed information panel */
 .subject-card {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 4px 20px;
+  gap: 0.35em 1.1em;
+  margin: 0;
   border: 1px solid var(--ink);
-  padding: 16px 20px;
+  padding: 0.9em 1.1em;
   background: rgba(255, 255, 255, 0.35);
 }
 
 .subject-card dt {
   font-weight: bold;
   text-transform: uppercase;
-  font-size: 0.85rem;
-  padding-top: 2px;
+  font-size: 0.78em;
+  padding-top: 0.2em;
 }
 
 .subject-card dd { margin: 0; }
 
-/* Photographs */
+/* Photographs pinned to the sheet */
 figure {
-  margin: 24px 0;
-  padding: 12px;
+  margin: 0.4em 0 0.8em;
+  padding: 0.55em;
   background: #fff;
   border: 1px solid var(--rule);
   transform: rotate(-0.6deg);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0.25em 0.6em rgba(0, 0, 0, 0.15);
 }
 
 figure img {
@@ -213,202 +256,420 @@ figure img {
 }
 
 figcaption {
-  font-size: 0.85rem;
+  font-size: 0.78em;
   color: var(--ink-soft);
-  margin-top: 8px;
+  margin-top: 0.4em;
+  line-height: 1.4;
 }
 
-/* Threat assessment table (ID selector: one unique panel on the Public Brief) */
-#threat {
+sup a { text-decoration: none; }
+
+/* Threat assessment panel */
+.threat-panel {
   border: 2px solid var(--ink);
-  padding: 4px 20px 16px;
-  margin-top: 36px;
+  padding: 0.1em 0.9em 0.6em;
 }
 
-.table-wrap { overflow-x: auto; }
+.threat-panel h2 { margin-top: 0.5em; }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
+  font-size: 0.85em;
 }
 
 caption {
   text-align: left;
-  font-size: 0.85rem;
+  font-size: 0.9em;
   color: var(--ink-soft);
-  padding-bottom: 8px;
+  padding-bottom: 0.4em;
 }
 
 th, td {
   text-align: left;
   vertical-align: top;
-  padding: 6px 10px 6px 0;
+  padding: 0.3em 0.6em 0.3em 0;
   border-bottom: 1px dotted var(--rule);
 }
 
-th { text-transform: uppercase; font-size: 0.8rem; }
+th { text-transform: uppercase; font-size: 0.85em; }
 
-.bar { white-space: nowrap; letter-spacing: -1px; }
+.bar { white-space: nowrap; letter-spacing: -0.06em; }
 
 .verdict {
-  font-family: "Special Elite", "Courier New", monospace;
   color: var(--stamp);
-  font-size: 1.1rem;
-  margin-bottom: 0;
+  font-size: 1.05em;
+  margin: 0.6em 0 0;
 }
 
-/* Analyst theories */
-.theories {
-  display: grid;
-  gap: 16px;
-}
-
-.theory {
-  border-left: 4px solid var(--rule);
-  padding: 4px 0 4px 16px;
-}
-
-/* Clearance gate link */
+/* Hand-off box on the last Public Brief sheet */
 .clearance-gate {
-  margin: 40px 0 8px;
-  padding: 18px 20px;
+  margin: 1em 0;
+  padding: 0.7em 1em;
   border: 2px dashed var(--stamp);
   text-align: center;
 }
 
-.clearance-gate a {
-  font-family: "Special Elite", "Courier New", monospace;
-  font-size: 1.15rem;
-}
+.clearance-gate p { margin: 0 0 0.3em; }
+.clearance-gate a { font-size: 1.1em; }
 
-/* Access banner (ID selector: appears once, on the Classified Annex) */
+.back-link { margin-top: 1.2em; font-size: 0.9em; }
+
+/* Classified access banner */
 #access-banner {
+  margin-top: 1em;
   background: var(--redact);
   color: var(--paper);
-  padding: 12px 16px;
-  font-size: 0.95rem;
+  padding: 0.6em 0.9em;
+  font-size: 0.85em;
 }
 
 #access-banner p { margin: 0; }
 
-/* Page-specific touches, keyed off each page's <body> ID */
-#page-classified .page-no { color: var(--stamp); }
+/* Analyst theories */
+.theories {
+  display: grid;
+  gap: 0.6em;
+}
 
-/* Footnotes */
+.theory {
+  border-left: 0.25em solid var(--rule);
+  padding: 0.1em 0 0.1em 0.8em;
+}
+
+.theory h3 { margin-top: 0; }
+.theory p { margin: 0; }
+
+/* Footnotes and footer */
 .field-notes {
-  font-size: 0.85rem;
+  font-size: 0.8em;
   color: var(--ink-soft);
 }
 
-.field-notes h2 { font-size: 1rem; }
+.field-notes h3 { margin-top: 0.8em; }
 
-sup a { text-decoration: none; }
-
-/* ---------- Footer ---------- */
 footer {
-  margin-top: 40px;
-  padding-top: 16px;
+  margin-top: 1em;
+  padding-top: 0.6em;
   border-top: 3px double var(--ink);
-  font-size: 0.8rem;
+  font-size: 0.72em;
   color: var(--ink-soft);
   text-align: center;
 }
 
-footer p { margin: 4px 0; }
+footer p { margin: 0; }
 
-/* ---------- Page-flip transition between the two dossier pages ----------
-   Pure CSS cross-document View Transitions. Both dossier pages load this
-   stylesheet, so moving between them animates; the Records Terminal does
-   not opt in, so arriving from it stays instant. Browsers without support
-   (currently Firefox) simply switch pages with no animation.
 
-   Forward (Brief -> Classified): the Brief slides off the top of the pile.
-   Back (Classified -> Brief): the Brief slides back onto the pile.        */
+/* ---------- 3. Clipboard mode ----------
+   Wide enough screens in browsers that support scroll-driven animations.
+   Every sheet is fixed in the same spot on the board, stacked with page 1
+   on top. An invisible track of full-height "stops" gives the page
+   something to scroll; scroll-snap lands exactly on one stop per sheet,
+   and each sheet's flip is tied to the scroll distance of its own stop. */
+
+@supports (animation-timeline: scroll()) {
+  @media (min-width: 760px) and (min-height: 560px) {
+
+    :root {
+      --top: 58px;     /* room above the sheet for the clip */
+      --bottom: 62px;  /* room below the sheet for the nav strip */
+      /* Largest US-letter sheet (8.5 x 11) that fits the window */
+      --sheet-h: min(calc(100vh - var(--top) - var(--bottom)),
+                     calc((100vw - 120px) * 11 / 8.5));
+      --sheet-w: calc(var(--sheet-h) * 8.5 / 11);
+      --board-pad: 26px;
+
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+    }
+
+    :root::-webkit-scrollbar { display: none; }
+
+    /* The invisible track that the scroll wheel moves through */
+    .track { display: block; }
+
+    .stop {
+      height: 100vh;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;   /* one wheel flick = one page */
+    }
+
+    /* Hardboard clipboard */
+    .board {
+      display: block;
+      position: fixed;
+      z-index: 0;
+      top: 12px;
+      bottom: 12px;
+      left: 50%;
+      width: calc(var(--sheet-w) + var(--board-pad) * 2);
+      transform: translateX(-50%);
+      border-radius: 22px;
+      background:
+        repeating-linear-gradient(97deg,
+          rgba(255, 255, 255, 0.035) 0 2px,
+          rgba(0, 0, 0, 0.035) 2px 5px),
+        linear-gradient(160deg, var(--board) 0%, var(--board-dark) 100%);
+      box-shadow:
+        inset 0 0 0 2px rgba(255, 255, 255, 0.08),
+        inset 0 -6px 14px rgba(0, 0, 0, 0.25),
+        0 24px 50px rgba(0, 0, 0, 0.55);
+    }
+
+    /* Metal clip, drawn with gradients */
+    .clip {
+      display: block;
+      position: fixed;
+      z-index: 20;
+      top: 18px;
+      left: 50%;
+      width: min(46%, calc(var(--sheet-w) * 0.5));
+      height: 64px;
+      transform: translateX(-50%);
+      border-radius: 14px 14px 10px 10px;
+      background: linear-gradient(180deg,
+        var(--metal-light) 0%, #c6cbd1 45%, var(--metal-dark) 100%);
+      box-shadow:
+        inset 0 1px 0 #fff,
+        inset 0 -3px 6px rgba(0, 0, 0, 0.25),
+        0 6px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    /* Lever and rivets */
+    .clip::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      width: 44%;
+      height: 22px;
+      transform: translateX(-50%);
+      border: 5px solid #a9afb6;
+      border-bottom: none;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .clip::after {
+      content: "";
+      position: absolute;
+      top: 24px;
+      left: 14%;
+      right: 14%;
+      height: 10px;
+      border-radius: 6px;
+      background:
+        radial-gradient(circle at 6px 5px, #6f757c 3px, transparent 4px) left / 50% 100% no-repeat,
+        radial-gradient(circle at calc(100% - 6px) 5px, #6f757c 3px, transparent 4px) right / 50% 100% no-repeat;
+    }
+
+    /* Nav strip printed along the bottom of the board */
+    .board-nav {
+      position: fixed;
+      z-index: 20;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(var(--sheet-w) + var(--board-pad) * 2);
+      max-width: none;
+      height: calc(var(--bottom) - 12px);
+      padding: 10px var(--board-pad) 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(10px, calc(var(--sheet-h) * 0.0185), 14px);
+    }
+
+    .board-nav ul {
+      flex-wrap: nowrap;
+      gap: 0 1.6em;
+      white-space: nowrap;
+    }
+
+    /* Hint stencilled on the board, left of the clip */
+    .board::after {
+      content: "Scroll \2193  to turn";
+      position: absolute;
+      top: 20px;
+      left: 22px;
+      font-size: clamp(9px, calc(var(--sheet-h) * 0.016), 12px);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(243, 236, 218, 0.6);
+    }
+
+    /* The pile of sheets */
+    .stack {
+      position: fixed;
+      z-index: 10;
+      inset: 0;
+      max-width: none;
+      margin: 0;
+      padding: 0;
+      perspective: 2200px;
+      perspective-origin: 50% var(--top);
+      view-transition-name: sheets;
+    }
+
+    /* A couple of loose sheet edges under the pile */
+    .stack::before {
+      content: "";
+      position: absolute;
+      top: var(--top);
+      left: 50%;
+      width: var(--sheet-w);
+      height: var(--sheet-h);
+      transform: translateX(-50%);
+      background: var(--paper);
+      box-shadow:
+        4px 5px 0 -1px #e6dec7,
+        4px 5px 0 0 var(--rule),
+        8px 10px 0 -1px #dad1b7,
+        8px 10px 0 0 #a39878,
+        0 14px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    .sheet {
+      position: absolute;
+      top: var(--top);
+      left: 50%;
+      width: var(--sheet-w);
+      height: var(--sheet-h);
+      margin: 0 0 0 calc(var(--sheet-w) / -2);
+      padding: calc(var(--sheet-w) * 0.085) calc(var(--sheet-w) * 0.08) calc(var(--sheet-w) * 0.06);
+      overflow: hidden;
+      /* All text is sized from the sheet, so every page looks the same at
+         any window size, like real letter paper. */
+      font-size: calc(var(--sheet-h) * 0.0205);
+      box-shadow: 0 0 0 1px var(--paper-edge);
+      z-index: calc(100 - var(--i));
+
+      transform-origin: 50% 0;   /* hinge along the clip */
+      backface-visibility: hidden;
+
+      /* Flip: driven by the page's scroll position, not by time.
+         Sheet i turns while the reader scrolls through stop i, and is
+         uncovered (out of the previous sheet's shadow) during stop i-1. */
+      animation-name: flip-up, uncover;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root), scroll(root);
+      animation-range:
+        calc((var(--i) - 1) * 100vh) calc(var(--i) * 100vh),
+        calc((var(--i) - 2) * 100vh) calc((var(--i) - 1) * 100vh);
+    }
+
+    /* Stacking order: first sheet on top */
+    .sheet:nth-child(1) { --i: 1; }
+    .sheet:nth-child(2) { --i: 2; }
+    .sheet:nth-child(3) { --i: 3; }
+    .sheet:nth-child(4) { --i: 4; }
+    .sheet:nth-child(5) { --i: 5; }
+    .sheet:nth-child(6) { --i: 6; }
+    .sheet:nth-child(7) { --i: 7; }
+    .sheet:nth-child(8) { --i: 8; }
+
+    /* The last sheet stays on the board */
+    .sheet:last-child { animation-name: none, uncover; }
+  }
+}
+
+/* Sheet folds up from its bottom edge, over the clip and out of view */
+@keyframes flip-up {
+  from { transform: rotateX(0deg); }
+  to   { transform: rotateX(180deg); }
+}
+
+/* The sheet underneath brightens as the one above lifts off it */
+@keyframes uncover {
+  from { filter: brightness(0.8); }
+  to   { filter: brightness(1); }
+}
+
+
+/* ---------- 4. Turning from one file to the other ----------
+   Clicking "Request clearance" (page 7) or "Back to page 7" (page 8)
+   loads the other HTML file; a cross-document View Transition plays the
+   same flip on the whole pile. The Records Terminal does not opt in, so
+   arriving from it is instant. */
 
 @view-transition {
   navigation: auto;
 }
 
-:root {
-  /* Limits the moving snapshot to the paper column (plus a soft edge that
-     reads as a cast shadow), so the dark desk around it stays put. */
-  --sheet-mask: linear-gradient(
-    to right,
-    transparent calc(50% - 472px),
-    #000 calc(50% - 436px),
-    #000 calc(50% + 446px),
-    transparent calc(50% + 482px)
-  );
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
 }
 
-/* Forward: arriving on the Classified Annex */
-:root:has(#page-classified)::view-transition-old(root) {
+::view-transition-group(sheets) {
+  animation-duration: 0.75s;
+}
+
+/* Forward into the Annex: the Brief's last sheet flips up over the clip */
+:root:has(#page-classified)::view-transition-old(sheets) {
   z-index: 2;
-  -webkit-mask-image: var(--sheet-mask);
-  mask-image: var(--sheet-mask);
-  transform-origin: 20% 100%;
-  animation: sheet-off 0.7s cubic-bezier(0.55, 0.05, 0.7, 0.4) both;
+  transform-origin: 50% var(--top, 58px);
+  backface-visibility: hidden;
+  animation: vt-flip-up 0.75s cubic-bezier(0.5, 0, 0.75, 0.4) both;
 }
 
-:root:has(#page-classified)::view-transition-new(root) {
-  animation: sheet-uncover 0.7s ease-out both;
+:root:has(#page-classified)::view-transition-new(sheets) {
+  animation: uncover 0.75s ease-out both;
 }
 
-/* Back: arriving on the Public Brief */
-:root:has(#page-brief)::view-transition-new(root) {
+/* Back to the Brief: its last sheet flips down onto the pile */
+:root:has(#page-brief)::view-transition-new(sheets) {
   z-index: 2;
-  -webkit-mask-image: var(--sheet-mask);
-  mask-image: var(--sheet-mask);
-  transform-origin: 20% 100%;
-  animation: sheet-on 0.7s cubic-bezier(0.2, 0.65, 0.3, 1) both;
+  transform-origin: 50% var(--top, 58px);
+  backface-visibility: hidden;
+  animation: vt-flip-down 0.75s cubic-bezier(0.25, 0.6, 0.35, 1) both;
 }
 
-:root:has(#page-brief)::view-transition-old(root) {
-  animation: sheet-cover 0.7s ease-in both;
+:root:has(#page-brief)::view-transition-old(sheets) {
+  animation: uncover 0.75s ease-in reverse both;
 }
 
-@keyframes sheet-off {
-  from { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-  85%  { opacity: 1; }
-  to   { transform: translate(72vw, -28vh) rotate(9deg); opacity: 0; }
+@keyframes vt-flip-up {
+  from { transform: perspective(2200px) rotateX(0deg); }
+  to   { transform: perspective(2200px) rotateX(180deg); }
 }
 
-@keyframes sheet-on {
-  from { transform: translate(72vw, -28vh) rotate(9deg); opacity: 0; }
-  15%  { opacity: 1; }
-  to   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+@keyframes vt-flip-down {
+  from { transform: perspective(2200px) rotateX(180deg); }
+  to   { transform: perspective(2200px) rotateX(0deg); }
 }
 
-/* The page underneath sits in the top sheet's shadow until it is uncovered */
-@keyframes sheet-uncover {
-  from { filter: brightness(0.78); }
-  to   { filter: brightness(1); }
-}
 
-@keyframes sheet-cover {
-  from { filter: brightness(1); }
-  to   { filter: brightness(0.78); }
-}
+/* ---------- 5. Reduced motion ----------
+   Keep paging by scroll, but swap sheets instantly instead of flipping. */
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
+  .sheet { animation-timing-function: steps(1, jump-start); }
+  .redacted { transition: none; }
+
+  ::view-transition-old(sheets),
+  ::view-transition-new(sheets) {
     animation: none !important;
   }
 }
 
-/* ---------- Small screens ---------- */
-@media (max-width: 640px) {
-  body { font-size: 16px; }
-  .dossier {
-    margin: 0;
-    padding: 36px 16px 24px;
-    box-shadow: none;
+/* Exhibit photo on page 2 sits a little narrower so the page breathes */
+.exhibit {
+  width: 92%;
+  margin: 0.2em auto 1em;
+}
+
+/* Phones: stack the letterhead and the ID card into one column */
+@media (max-width: 520px) {
+  .letterhead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6em;
   }
-  .page-no { top: 10px; right: 16px; }
-  .letterhead { flex-direction: column; align-items: flex-start; }
-  h1 { font-size: 1.6rem; }
+
+  h1 { font-size: 1.5em; }
+
   .subject-card { grid-template-columns: 1fr; }
-  .subject-card dd { margin-bottom: 8px; }
+  .subject-card dd { margin-bottom: 0.5em; }
 }
