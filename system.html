@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="terminal.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
   <div class="terminal">
@@ -27,6 +28,7 @@
         <li><a href="system.html" aria-current="page">Terminal</a></li>
         <li><a href="index.html">XT-1026 Public Brief</a></li>
         <li><a href="classified.html">XT-1026 Classified Annex</a></li>
+        <li><button type="button" class="lights-toggle" id="lamp-switch" aria-pressed="false">Room lights: <span id="lamp-state">Off</span></button></li>
       </ul>
     </nav>
 
@@ -47,21 +49,19 @@
       <section class="panel" id="login">
         <h2>Agent Authentication</h2>
         <div class="login-grid">
-          <form action="index.html" method="get" autocomplete="off">
+          <form id="login-form" autocomplete="off" novalidate>
             <div class="field">
-              <label for="agent-id">Agent ID</label>
-              <input type="text" id="agent-id" placeholder="e.g. TOR-0417">
-            </div>
-            <div class="field">
-              <label for="passphrase">Passphrase</label>
-              <input type="password" id="passphrase" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;">
+              <label for="agent-name-input">Agent name</label>
+              <input type="text" id="agent-name-input" name="agent-name" maxlength="40" placeholder="e.g. Mulder" aria-describedby="login-message">
             </div>
             <button type="submit">AUTHENTICATE &gt;</button>
+            <p id="login-message" class="login-message" role="status" aria-live="polite"></p>
+            <p class="open-file is-hidden" id="open-file"><a class="open-link" href="index.html">OPEN CASE FILE XT-1026 &gt;</a></p>
           </form>
           <div class="login-notice">
             <p>NOTICE: This terminal is restricted to Bureau personnel. Every login attempt is logged and reviewed.</p>
-            <p>Any passphrase is currently accepted. A security upgrade was requested in 1987 and remains under review.</p>
-            <p>Agents in training may leave both fields blank.</p>
+            <p>Passphrases were discontinued in 1987, after an agent forgot his. Your name is now considered sufficient.</p>
+            <p>Agents in training must still enter a name. Blank entries are refused.</p>
           </div>
         </div>
       </section>
@@ -128,6 +128,7 @@
         </div>
       </section>
 
+
     </main>
 
     <footer>
@@ -136,6 +137,5 @@
     </footer>
 
   </div>
-  <script src="script.js"></script>
 </body>
 </html>

@@ -4,10 +4,12 @@
 
    1. Tokens and base type
    2. Paper sheets and their content (works everywhere)
-   3. Clipboard mode: board, clip, scroll-to-flip (desktop/tablet,
-      browsers with scroll-driven animations)
-   4. Page turn between the two files (View Transitions)
-   5. Reduced motion
+   3. Sticky notes, the agent's pen and the desk lamp (all sizes)
+   4. Clipboard mode: board, clip and page flip (tablet / desktop;
+      script.js adds the .is-flipped / .is-current classes)
+   5. Page turn between the two files (View Transitions)
+   6. Desk lamp lighting: spotlight on / lights off (.theme-dark)
+   7. Reduced motion and phones
    ===================================================================== */
 
 
@@ -56,8 +58,7 @@ a { color: var(--stamp); }
    like papers laid out on a desk, and the page scrolls normally. */
 
 .board,
-.clip,
-.track { display: none; }
+.clip { display: none; }
 
 .board-nav {
   max-width: 640px;
@@ -75,7 +76,7 @@ a { color: var(--stamp); }
 }
 
 .board-nav a {
-  color: var(--paper);
+  color: #f3ecda;
   text-decoration: none;
   border-bottom: 1px dashed rgba(243, 236, 218, 0.5);
 }
@@ -360,238 +361,555 @@ footer {
 footer p { margin: 0; }
 
 
-/* ---------- 3. Clipboard mode ----------
-   Wide enough screens in browsers that support scroll-driven animations.
-   Every sheet is fixed in the same spot on the board, stacked with page 1
-   on top. An invisible track of full-height "stops" gives the page
-   something to scroll; scroll-snap lands exactly on one stop per sheet,
-   and each sheet's flip is tied to the scroll distance of its own stop. */
+/* Exhibit photo on page 2 sits a little narrower so the page breathes */
+.exhibit {
+  width: 92%;
+  margin: 0.2em auto 1em;
+}
 
-@supports (animation-timeline: scroll()) {
-  @media (min-width: 760px) and (min-height: 560px) {
 
-    :root {
-      --top: 58px;     /* room above the sheet for the clip */
-      --bottom: 62px;  /* room below the sheet for the nav strip */
-      /* Largest US-letter sheet (8.5 x 11) that fits the window */
-      --sheet-h: min(calc(100vh - var(--top) - var(--bottom)),
-                     calc((100vw - 120px) * 11 / 8.5));
-      --sheet-w: calc(var(--sheet-h) * 8.5 / 11);
-      --board-pad: 26px;
+/* ---------- 3. Sticky notes, the agent's pen and the desk lamp ---------- */
 
-      scroll-snap-type: y mandatory;
-      scrollbar-width: none;
-    }
+:root {
+  --sticky: #fbe98a;
+  --sticky-edge: #e9d368;
+  --pen-ink: #1f3f9a;
+  --hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+}
 
-    :root::-webkit-scrollbar { display: none; }
+/* Handwritten sticky notes stuck onto the sheets */
+.sticky {
+  position: relative;
+  width: 70%;
+  margin: 1em auto;
+  padding: 0.7em 0.8em 0.6em;
+  background: linear-gradient(180deg, var(--sticky-edge) 0 0.5em, var(--sticky) 0.5em);
+  color: #2b2614;
+  font-family: var(--hand);
+  font-size: 1.25em;
+  line-height: 1.1;
+  transform: rotate(-2deg);
+  box-shadow: 0 0.35em 0.6em rgba(0, 0, 0, 0.22);
+  z-index: 2;
+}
 
-    /* The invisible track that the scroll wheel moves through */
-    .track { display: block; }
+.sticky p { margin: 0 0 0.2em; }
 
-    .stop {
-      height: 100vh;
-      scroll-snap-align: start;
-      scroll-snap-stop: always;   /* one wheel flick = one page */
-    }
+.sticky .sig {
+  text-align: right;
+  font-size: 0.9em;
+}
 
-    /* Hardboard clipboard */
-    .board {
-      display: block;
-      position: fixed;
-      z-index: 0;
-      top: 12px;
-      bottom: 12px;
-      left: 50%;
-      width: calc(var(--sheet-w) + var(--board-pad) * 2);
-      transform: translateX(-50%);
-      border-radius: 22px;
-      background:
-        repeating-linear-gradient(97deg,
-          rgba(255, 255, 255, 0.035) 0 2px,
-          rgba(0, 0, 0, 0.035) 2px 5px),
-        linear-gradient(160deg, var(--board) 0%, var(--board-dark) 100%);
-      box-shadow:
-        inset 0 0 0 2px rgba(255, 255, 255, 0.08),
-        inset 0 -6px 14px rgba(0, 0, 0, 0.25),
-        0 24px 50px rgba(0, 0, 0, 0.55);
-    }
+/* A second agent's reply, in red pen */
+.sticky .reply {
+  margin-top: 0.3em;
+  color: #a8231b;
+  transform: rotate(-3deg);
+}
 
-    /* Metal clip, drawn with gradients */
-    .clip {
-      display: block;
-      position: fixed;
-      z-index: 20;
-      top: 18px;
-      left: 50%;
-      width: min(46%, calc(var(--sheet-w) * 0.5));
-      height: 64px;
-      transform: translateX(-50%);
-      border-radius: 14px 14px 10px 10px;
-      background: linear-gradient(180deg,
-        var(--metal-light) 0%, #c6cbd1 45%, var(--metal-dark) 100%);
-      box-shadow:
-        inset 0 1px 0 #fff,
-        inset 0 -3px 6px rgba(0, 0, 0, 0.25),
-        0 6px 10px rgba(0, 0, 0, 0.45);
-    }
+/* "Agent annotation" strip that script.js adds to every sheet */
+.annotation {
+  margin-top: 1em;
+  padding-top: 0.4em;
+  border-top: 1px dashed var(--rule);
+}
 
-    /* Lever and rivets */
-    .clip::before {
-      content: "";
-      position: absolute;
-      top: -10px;
-      left: 50%;
-      width: 44%;
-      height: 22px;
-      transform: translateX(-50%);
-      border: 5px solid #a9afb6;
-      border-bottom: none;
-      border-radius: 14px 14px 0 0;
-    }
+.annotation-label {
+  margin: 0;
+  font-size: 0.68em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
 
-    .clip::after {
-      content: "";
-      position: absolute;
-      top: 24px;
-      left: 14%;
-      right: 14%;
-      height: 10px;
-      border-radius: 6px;
-      background:
-        radial-gradient(circle at 6px 5px, #6f757c 3px, transparent 4px) left / 50% 100% no-repeat,
-        radial-gradient(circle at calc(100% - 6px) 5px, #6f757c 3px, transparent 4px) right / 50% 100% no-repeat;
-    }
+.annotation-text {
+  margin: 0.1em 0 0;
+  min-height: 1.1em;
+  font-family: var(--hand);
+  font-size: 1.22em;
+  line-height: 1.05;
+  color: var(--pen-ink);
+}
 
-    /* Nav strip printed along the bottom of the board */
-    .board-nav {
-      position: fixed;
-      z-index: 20;
-      bottom: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(var(--sheet-w) + var(--board-pad) * 2);
-      max-width: none;
-      height: calc(var(--bottom) - 12px);
-      padding: 10px var(--board-pad) 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: clamp(10px, calc(var(--sheet-h) * 0.0185), 14px);
-    }
+.annotation-text:empty::before {
+  content: "(click the agent's pen to add an observation)";
+  font-family: "Courier Prime", "Courier New", monospace;
+  font-size: 0.55em;
+  color: var(--rule);
+}
 
-    .board-nav ul {
-      flex-wrap: nowrap;
-      gap: 0 1.6em;
-      white-space: nowrap;
-    }
+/* The ink appears left to right, as if being written */
+.annotation-text.is-writing {
+  animation: write-in 1.2s steps(30, end) both;
+}
 
-    /* Hint stencilled on the board, left of the clip */
-    .board::after {
-      content: "Scroll \2193  to turn";
-      position: absolute;
-      top: 20px;
-      left: 22px;
-      font-size: clamp(9px, calc(var(--sheet-h) * 0.016), 12px);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(243, 236, 218, 0.6);
-    }
+@keyframes write-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
 
-    /* The pile of sheets */
-    .stack {
-      position: fixed;
-      z-index: 10;
-      inset: 0;
-      max-width: none;
-      margin: 0;
-      padding: 0;
-      perspective: 2200px;
-      perspective-origin: 50% var(--top);
-      view-transition-name: sheets;
-    }
+/* The pen: a real <button> drawn as a ballpoint pen.
+   All parts are sized in % of the pen, so it can be drawn at any size.
+   Phones: a smaller pen floats in the bottom-right corner. */
+.pen {
+  --pen-len: 150px;
+  --pen-rot: -18deg;
+  position: fixed;
+  z-index: 25;
+  right: 18px;
+  bottom: 26px;
+  width: var(--pen-len);
+  height: calc(var(--pen-len) * 0.075);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform: rotate(var(--pen-rot));
+  transition: transform 0.2s ease;
+  filter: drop-shadow(0.4em 0.7em 0.5em rgba(0, 0, 0, 0.5));
+  font-size: calc(var(--pen-len) * 0.04);
+}
 
-    /* A couple of loose sheet edges under the pile */
-    .stack::before {
-      content: "";
-      position: absolute;
-      top: var(--top);
-      left: 50%;
-      width: var(--sheet-w);
-      height: var(--sheet-h);
-      transform: translateX(-50%);
-      background: var(--paper);
-      box-shadow:
-        4px 5px 0 -1px #e6dec7,
-        4px 5px 0 0 var(--rule),
-        8px 10px 0 -1px #dad1b7,
-        8px 10px 0 0 #a39878,
-        0 14px 28px rgba(0, 0, 0, 0.45);
-    }
+/* Barrel: rubber grip near the tip, navy body, metal click button at the end */
+.pen-body {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 11%;
+  right: 0;
+  border-radius: 12% 40% 40% 12% / 50%;
+  background:
+    linear-gradient(90deg,
+      #1c1d22 0 17%,
+      transparent 17% 95%,
+      #b9bec5 95% 97%,
+      #e9ecef 97% 100%),
+    linear-gradient(180deg, #5b7fe0 0%, #2448ad 38%, #16307a 75%, #0e2056 100%);
+}
 
-    .sheet {
-      position: absolute;
-      top: var(--top);
-      left: 50%;
-      width: var(--sheet-w);
-      height: var(--sheet-h);
-      margin: 0 0 0 calc(var(--sheet-w) / -2);
-      padding: calc(var(--sheet-w) * 0.085) calc(var(--sheet-w) * 0.08) calc(var(--sheet-w) * 0.06);
-      overflow: hidden;
-      /* All text is sized from the sheet, so every page looks the same at
-         any window size, like real letter paper. */
-      font-size: calc(var(--sheet-h) * 0.0205);
-      box-shadow: 0 0 0 1px var(--paper-edge);
-      z-index: calc(100 - var(--i));
+/* Metal cone and ballpoint tip */
+.pen-body::before {
+  content: "";
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  left: -12.4%;
+  width: 12.4%;
+  background: linear-gradient(180deg, #f2f4f6, #9aa1a8 60%, #5f666e);
+  clip-path: polygon(0 47%, 8% 44%, 100% 0, 100% 100%, 8% 56%, 0 53%);
+}
 
-      transform-origin: 50% 0;   /* hinge along the clip */
-      backface-visibility: hidden;
+/* Pocket clip */
+.pen-body::after {
+  content: "";
+  position: absolute;
+  top: -22%;
+  right: 4%;
+  width: 40%;
+  height: 34%;
+  border-radius: 0.3em 0.3em 0.3em 1em;
+  background: linear-gradient(180deg, #ffffff, #c4c9cf 50%, #7d848b);
+  box-shadow: 0 0.15em 0.2em rgba(0, 0, 0, 0.35);
+}
 
-      /* Flip: driven by the page's scroll position, not by time.
-         Sheet i turns while the reader scrolls through stop i, and is
-         uncovered (out of the previous sheet's shadow) during stop i-1. */
-      animation-name: flip-up, uncover;
-      animation-duration: auto;
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-      animation-timeline: scroll(root), scroll(root);
-      animation-range:
-        calc((var(--i) - 1) * 100vh) calc(var(--i) * 100vh),
-        calc((var(--i) - 2) * 100vh) calc((var(--i) - 1) * 100vh);
-    }
+.pen:hover,
+.pen:focus-visible {
+  transform: rotate(calc(var(--pen-rot) - 4deg)) translateY(-6%);
+  outline: none;
+}
 
-    /* Stacking order: first sheet on top */
-    .sheet:nth-child(1) { --i: 1; }
-    .sheet:nth-child(2) { --i: 2; }
-    .sheet:nth-child(3) { --i: 3; }
-    .sheet:nth-child(4) { --i: 4; }
-    .sheet:nth-child(5) { --i: 5; }
-    .sheet:nth-child(6) { --i: 6; }
-    .sheet:nth-child(7) { --i: 7; }
-    .sheet:nth-child(8) { --i: 8; }
+.pen:focus-visible .pen-body {
+  box-shadow: 0 0 0 0.25em #ffd9a0;
+}
 
-    /* The last sheet stays on the board */
-    .sheet:last-child { animation-name: none, uncover; }
+.pen.is-scribbling {
+  animation: scribble 0.6s ease-in-out;
+}
+
+@keyframes scribble {
+  0%, 100% { transform: rotate(var(--pen-rot)); }
+  20% { transform: rotate(calc(var(--pen-rot) - 8deg)) translate(-3%, 4%); }
+  40% { transform: rotate(calc(var(--pen-rot) + 4deg)) translate(2%, -2%); }
+  60% { transform: rotate(calc(var(--pen-rot) - 6deg)) translate(-2%, 3%); }
+  80% { transform: rotate(calc(var(--pen-rot) + 2deg)) translate(1%, -1%); }
+}
+
+/* Green banker's lamp standing on the desk (phones: small, top-right) */
+.desk-lamp {
+  position: absolute;
+  z-index: 25;
+  top: 6px;
+  right: 34px;    /* leaves room for the glow, so the page never scrolls sideways */
+  width: 70px;
+  aspect-ratio: 380 / 540;
+  isolation: isolate;
+}
+
+.desk-lamp-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  pointer-events: none;
+}
+
+/* Warm pool of light on the desk around the base while the lamp is on */
+.desk-lamp::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -30%;
+  top: 30%;
+  width: 160%;
+  height: 80%;
+  background: radial-gradient(ellipse 50% 50% at 50% 70%,
+    rgba(255, 224, 150, 0.55) 0%,
+    rgba(255, 214, 130, 0.2) 45%,
+    rgba(255, 214, 130, 0) 75%);
+  filter: blur(6px);
+  transition: opacity 0.35s ease;
+}
+
+/* The lit inside of the shade */
+.desk-lamp::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 9%;
+  top: 22.2%;
+  width: 82%;
+  height: 6%;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: radial-gradient(ellipse at 50% 20%,
+    #fffbe6 0%, #ffe08a 45%, rgba(255, 200, 90, 0.5) 80%, rgba(255, 200, 90, 0) 100%);
+  box-shadow: 0 10px 26px rgba(255, 220, 140, 0.75);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+/* The switch: a real <button> drawn as a brass toggle on the lamp's base */
+.lamp-switch {
+  position: absolute;
+  z-index: 2;
+  left: 78%;
+  top: 89.4%;
+  width: 12%;
+  aspect-ratio: 1.5;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 1px solid #6e4b14;
+  border-radius: 30%;
+  background: linear-gradient(180deg, #8a6420, #5a3d0e);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 240, 190, 0.5);
+  cursor: pointer;
+}
+
+/* The lever: tipped one way when on, the other way when off */
+.lamp-switch::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34%;
+  height: 120%;
+  border-radius: 40% 40% 30% 30%;
+  background: linear-gradient(90deg, #fff0b8, #d4a545 55%, #8a601d);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -58%) rotate(-28deg);
+  transform-origin: 50% 90%;
+  transition: transform 0.15s ease;
+}
+
+.lamp-switch[aria-pressed="false"]::before {
+  transform: translate(-50%, -58%) rotate(28deg);
+}
+
+.lamp-switch:hover::before { filter: brightness(1.12); }
+
+.lamp-switch:focus-visible {
+  outline: 2px solid #ffd9a0;
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: normal;
+}
+
+
+/* ---------- 4. Clipboard mode ----------
+   Tablet and desktop. Every sheet sits in the same spot on the board,
+   page 1 on top. script.js gives the sheets above the current page the
+   .is-flipped class, and the CSS transition folds them up over the clip. */
+
+@media (min-width: 760px) and (min-height: 560px) {
+
+  :root {
+    --top: 58px;     /* room above the sheet for the clip */
+    --bottom: 62px;  /* room below the sheet for the nav strip */
+    /* Largest US-letter sheet (8.5 x 11) that fits the window */
+    --sheet-h: min(calc(100vh - var(--top) - var(--bottom)),
+                   calc((100vw - 120px) * 11 / 8.5));
+    --sheet-w: calc(var(--sheet-h) * 8.5 / 11);
+    --board-pad: 26px;
+
+    /* Desk space on each side of the clipboard, and the lamp sized to it */
+    --desk-free: calc((100vw - var(--sheet-w)) / 2 - var(--board-pad));
+    --lamp-gap: calc(var(--desk-free) * 0.12 + 6px);
+    --lamp-w: clamp(90px, min(var(--sheet-h) * 0.42, var(--desk-free) * 0.8), 360px);
   }
+
+  /* The clipboard never scrolls: script.js turns pages instead */
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Hardboard clipboard */
+  .board {
+    display: block;
+    position: fixed;
+    z-index: 0;
+    top: 12px;
+    bottom: 12px;
+    left: 50%;
+    width: calc(var(--sheet-w) + var(--board-pad) * 2);
+    transform: translateX(-50%);
+    border-radius: 22px;
+    background:
+      repeating-linear-gradient(97deg,
+        rgba(255, 255, 255, 0.035) 0 2px,
+        rgba(0, 0, 0, 0.035) 2px 5px),
+      linear-gradient(160deg, var(--board) 0%, var(--board-dark) 100%);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 255, 255, 0.08),
+      inset 0 -6px 14px rgba(0, 0, 0, 0.25),
+      0 24px 50px rgba(0, 0, 0, 0.55);
+    transition: filter 0.4s ease;
+  }
+
+  /* Metal clip, drawn with gradients */
+  .clip {
+    display: block;
+    position: fixed;
+    z-index: 20;
+    top: 18px;
+    left: 50%;
+    width: calc(var(--sheet-w) * 0.5);
+    height: 64px;
+    transform: translateX(-50%);
+    border-radius: 14px 14px 10px 10px;
+    background: linear-gradient(180deg,
+      var(--metal-light) 0%, #c6cbd1 45%, var(--metal-dark) 100%);
+    box-shadow:
+      inset 0 1px 0 #fff,
+      inset 0 -3px 6px rgba(0, 0, 0, 0.25),
+      0 6px 10px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Lever and rivets */
+  .clip::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 44%;
+    height: 22px;
+    transform: translateX(-50%);
+    border: 5px solid #a9afb6;
+    border-bottom: none;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .clip::after {
+    content: "";
+    position: absolute;
+    top: 24px;
+    left: 14%;
+    right: 14%;
+    height: 10px;
+    border-radius: 6px;
+    background:
+      radial-gradient(circle at 6px 5px, #6f757c 3px, transparent 4px) left / 50% 100% no-repeat,
+      radial-gradient(circle at calc(100% - 6px) 5px, #6f757c 3px, transparent 4px) right / 50% 100% no-repeat;
+  }
+
+  /* Lamp stands on the desk to the left of the clipboard. Its size follows
+     the clipboard, and the gap between them is a share of the free desk
+     space, so both grow and shrink together as the window changes. */
+  .desk-lamp {
+    position: fixed;
+    top: calc(var(--top) + var(--sheet-h) * 0.04);
+    left: calc(var(--desk-free) - var(--lamp-w) - var(--lamp-gap));
+    right: auto;
+    width: var(--lamp-w);
+  }
+
+  /* Pen lies on the desk to the right of the clipboard, at real size:
+     a 14.5 cm ballpoint beside 27.9 cm letter paper is 0.52 of the sheet.
+     Like the lamp, its gap from the clipboard follows the free desk space. */
+  .pen {
+    --pen-len: calc(var(--sheet-h) * 0.52);
+    --pen-rot: -64deg;
+    top: calc(var(--top) + var(--sheet-h) * 0.5);
+    bottom: auto;
+    right: auto;
+    /* centre of the pen = board edge + gap + half its tilted footprint */
+    left: calc(50% + var(--sheet-w) / 2 + var(--board-pad) + var(--lamp-gap)
+               + var(--pen-len) * 0.23 - var(--pen-len) / 2);
+  }
+
+  /* Nav strip printed along the bottom of the board */
+  .board-nav {
+    position: fixed;
+    z-index: 20;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(var(--sheet-w) + var(--board-pad) * 2);
+    max-width: none;
+    height: calc(var(--bottom) - 12px);
+    padding: 10px var(--board-pad) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(10px, calc(var(--sheet-h) * 0.0185), 14px);
+  }
+
+  .board-nav ul {
+    flex-wrap: nowrap;
+    gap: 0 1.6em;
+    white-space: nowrap;
+  }
+
+  /* The pile of sheets */
+  .stack {
+    position: fixed;
+    z-index: 10;
+    inset: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    perspective: 2200px;
+    perspective-origin: 50% var(--top);
+    view-transition-name: sheets;
+  }
+
+  /* A couple of loose sheet edges under the pile */
+  .stack::before {
+    content: "";
+    position: absolute;
+    top: var(--top);
+    left: 50%;
+    width: var(--sheet-w);
+    height: var(--sheet-h);
+    transform: translateX(-50%);
+    background: var(--paper);
+    box-shadow:
+      4px 5px 0 -1px var(--edge-1, #e6dec7),
+      4px 5px 0 0 var(--rule),
+      8px 10px 0 -1px var(--edge-2, #dad1b7),
+      8px 10px 0 0 #a39878,
+      0 14px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  .sheet {
+    position: absolute;
+    top: var(--top);
+    left: 50%;
+    width: var(--sheet-w);
+    height: var(--sheet-h);
+    margin: 0 0 0 calc(var(--sheet-w) / -2);
+    /* Extra bottom padding leaves room for the agent annotation strip */
+    padding: calc(var(--sheet-w) * 0.085) calc(var(--sheet-w) * 0.08) calc(var(--sheet-h) * 0.12);
+    overflow: hidden;
+    /* All text is sized from the sheet, so every page looks the same at
+       any window size, like real letter paper. */
+    font-size: calc(var(--sheet-h) * 0.0205);
+    box-shadow: 0 0 0 1px var(--paper-edge);
+    z-index: calc(100 - var(--i));
+
+    transform-origin: 50% 0;    /* hinge along the clip */
+    backface-visibility: hidden;
+  }
+
+  /* Before script.js takes over: page 1 on top */
+  .sheet:nth-child(1) { --i: 1; }
+  .sheet:nth-child(2) { --i: 2; }
+  .sheet:nth-child(3) { --i: 3; }
+  .sheet:nth-child(4) { --i: 4; }
+  .sheet:nth-child(5) { --i: 5; }
+  .sheet:nth-child(6) { --i: 6; }
+  .sheet:nth-child(7) { --i: 7; }
+  .sheet:nth-child(8) { --i: 8; }
+
+  /* Opening the file at a page (e.g. index.html#sheet-8): the sheets
+     before it start folded away, so the first paint is already right */
+  body:not(.js-ready) .sheet:has(~ .sheet .page-no:target) {
+    transform: rotateX(180deg);
+  }
+
+  /* Animated only once script.js has placed the starting page */
+  body.js-ready .sheet {
+    transition:
+      transform 0.75s cubic-bezier(0.45, 0.05, 0.4, 1),
+      filter 0.75s ease;
+  }
+
+  /* Folded up over the clip and out of view */
+  .sheet.is-flipped {
+    transform: rotateX(180deg);
+  }
+
+  /* Pages still underneath sit in the top sheet's shadow */
+  .sheet.is-under {
+    filter: brightness(0.8);
+  }
+
+  /* Annotation strip pinned along the bottom of each sheet */
+  .annotation {
+    position: absolute;
+    left: calc(var(--sheet-w) * 0.08);
+    right: calc(var(--sheet-w) * 0.08);
+    bottom: calc(var(--sheet-h) * 0.02);
+    height: calc(var(--sheet-h) * 0.09);
+    margin: 0;
+  }
+
+  /* Sticky notes stuck at set spots on their sheets */
+  .sticky {
+    position: absolute;
+    margin: 0;
+    width: 32%;
+    font-size: 1.3em;
+  }
+
+  .sticky-hint      { bottom: 12%; right: 8%; width: 42%; padding: 0.5em 0.7em 0.4em; transform: rotate(-2deg); font-size: 1.05em; }
+  .sticky-exhibit-a { top: 7%;   right: 3%; transform: rotate(4deg); }
+  .sticky-comfort   { bottom: 15%; right: 7%; width: 38%; transform: rotate(-3deg); }
+  .sticky-room      { bottom: 15%; left: 9%;  width: 40%; transform: rotate(2deg); }
+  .sticky-exhibit-b { top: 12%;  right: 3%; transform: rotate(-4deg); }
 }
 
-/* Sheet folds up from its bottom edge, over the clip and out of view */
-@keyframes flip-up {
-  from { transform: rotateX(0deg); }
-  to   { transform: rotateX(180deg); }
-}
 
-/* The sheet underneath brightens as the one above lifts off it */
-@keyframes uncover {
-  from { filter: brightness(0.8); }
-  to   { filter: brightness(1); }
-}
-
-
-/* ---------- 4. Turning from one file to the other ----------
-   Clicking "Request clearance" (page 7) or "Back to page 7" (page 8)
-   loads the other HTML file; a cross-document View Transition plays the
-   same flip on the whole pile. The Records Terminal does not opt in, so
-   arriving from it is instant. */
+/* ---------- 5. Turning from one file to the other ----------
+   Clicking "Request clearance" on page 8 (the only way in) loads the
+   Classified Annex; scrolling up from page 9 (or "Back to page 8") loads
+   the Brief. A cross-document View Transition plays the same flip on the
+   whole pile. The Records Terminal does not opt in, so arriving from it
+   is instant. Browsers without View Transitions simply switch pages. */
 
 @view-transition {
   navigation: auto;
@@ -630,6 +948,11 @@ footer p { margin: 0; }
   animation: uncover 0.75s ease-in reverse both;
 }
 
+@keyframes uncover {
+  from { filter: brightness(0.8); }
+  to   { filter: brightness(1); }
+}
+
 @keyframes vt-flip-up {
   from { transform: perspective(2200px) rotateX(0deg); }
   to   { transform: perspective(2200px) rotateX(180deg); }
@@ -641,23 +964,101 @@ footer p { margin: 0; }
 }
 
 
-/* ---------- 5. Reduced motion ----------
-   Keep paging by scroll, but swap sheets instantly instead of flipping. */
+/* ---------- 6. Desk lamp lighting ----------
+   The clipboard lies on a wooden desk. Two fixed light layers sit over the
+   desk, board and paper; they ignore the mouse, so everything underneath
+   still works.
+   Lamp on (default): warm light spreads from the green lamp's shade across
+   the desk and clipboard, and the far corners fall into shadow.
+   Lamp off (.theme-dark on <html>, set by script.js): the light fades out
+   and the whole desk darkens. Paper and board keep their own colours;
+   they are simply unlit. */
+
+:root {
+  /* Where the lamp's light comes from (phones: top-right corner) */
+  --lamp-x: calc(100% - 69px);
+  --lamp-y: 30px;
+}
+
+/* Walnut desk under everything */
+html { background: #24150a; }
+
+
+
+body {
+  background:
+    repeating-linear-gradient(178deg,
+      rgba(0, 0, 0, 0) 0 238px,
+      rgba(0, 0, 0, 0.35) 238px 240px,
+      rgba(255, 214, 170, 0.05) 240px 241px),
+    repeating-linear-gradient(179deg,
+      rgba(0, 0, 0, 0.09) 0 1px,
+      rgba(0, 0, 0, 0) 1px 7px,
+      rgba(255, 210, 160, 0.035) 7px 8px,
+      rgba(0, 0, 0, 0) 8px 19px),
+    linear-gradient(160deg, #573620 0%, #432815 55%, #2f1b0d 100%);
+  background-attachment: fixed;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+/* Lamp light: bright near the shade, fading across the desk */
+body::before {
+  background:
+    radial-gradient(circle at var(--lamp-x) var(--lamp-y),
+      rgba(255, 228, 165, 0.30) 0%,
+      rgba(255, 222, 155, 0.14) 22%,
+      rgba(255, 222, 155, 0.04) 45%,
+      rgba(255, 222, 155, 0) 60%),
+    radial-gradient(circle at var(--lamp-x) var(--lamp-y),
+      rgba(0, 0, 0, 0) 62%,
+      rgba(0, 0, 0, 0.42) 110%);
+  opacity: 1;
+}
+
+/* Lamp off: the room goes dark */
+body::after {
+  background: rgba(6, 7, 16, 0.68);
+  opacity: 0;
+}
+
+.theme-dark body::before { opacity: 0; }
+.theme-dark body::after  { opacity: 1; }
+.theme-dark .desk-lamp::before,
+.theme-dark .desk-lamp::after { opacity: 0; }
+
+.pen { z-index: 25; }
+
+/* Clipboard mode: light comes from the lamp in the upper-left corner */
+@media (min-width: 760px) and (min-height: 560px) {
+  :root {
+    /* Light comes from just under the shade */
+    --lamp-x: calc(var(--desk-free) - var(--lamp-gap) - var(--lamp-w) * 0.5);
+    --lamp-y: calc(var(--top) + var(--sheet-h) * 0.04 + var(--lamp-w) * 0.38);
+  }
+}
+
+
+/* ---------- 7. Reduced motion and phones ---------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .sheet { animation-timing-function: steps(1, jump-start); }
+  body.js-ready .sheet { transition: none; }
   .redacted { transition: none; }
+  .annotation-text.is-writing,
+  .pen.is-scribbling { animation: none; }
 
   ::view-transition-old(sheets),
   ::view-transition-new(sheets) {
     animation: none !important;
   }
-}
-
-/* Exhibit photo on page 2 sits a little narrower so the page breathes */
-.exhibit {
-  width: 92%;
-  margin: 0.2em auto 1em;
 }
 
 /* Phones: stack the letterhead and the ID card into one column */
@@ -672,4 +1073,6 @@ footer p { margin: 0; }
 
   .subject-card { grid-template-columns: 1fr; }
   .subject-card dd { margin-bottom: 0.5em; }
+
+  .board-nav { padding-right: 120px; }
 }

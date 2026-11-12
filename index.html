@@ -6,14 +6,31 @@
   <title>Case File XT-1026 | Public Brief | B.P.R.D.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="gate.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body id="page-brief">
 
-  <!-- The clipboard: board and metal clip are decoration; the sheets live in <main> -->
+  <!-- The clipboard: board and metal clip are decoration; the sheets live in <main>.
+       script.js turns the pages and adds an "Agent annotation" strip to each sheet. -->
   <div class="board" aria-hidden="true"></div>
   <div class="clip" aria-hidden="true"></div>
+
+  <!-- Green banker's lamp on the desk. The switch on its brass base is the
+       light / dark theme toggle (script.js). -->
+  <div class="desk-lamp">
+    <img src="images/banker-lamp.svg" alt="" class="desk-lamp-art">
+    <button type="button" class="lamp-switch" id="lamp-switch" aria-pressed="true" title="Desk lamp switch">
+      <span class="visually-hidden">Desk lamp: <span id="lamp-state">On</span></span>
+    </button>
+  </div>
+
+  <!-- Field agent's pen: random fact generator (script.js) -->
+  <button type="button" class="pen" id="pen" aria-label="Field agent's pen: write a new observation about the subject on this page">
+    <span class="pen-body" aria-hidden="true"></span>
+  </button>
 
   <nav class="board-nav" aria-label="Case file navigation">
     <ul>
@@ -27,7 +44,7 @@
 
     <!-- Page 1 -->
     <section class="sheet" id="identification" aria-label="Page 1">
-      <p class="page-no">Page 1 of 15</p>
+      <p class="page-no" id="sheet-1">Page 1 of 15</p>
       <header>
         <div class="letterhead">
           <img src="images/bprd-seal.svg" alt="Circular seal of the Bureau for Paranormal Research and Defense, Extraterrestrial Division, with a five-pointed star at its centre">
@@ -59,22 +76,33 @@
         <dt>Status</dt>
         <dd>Active. Non-hostile. Watched.</dd>
       </dl>
+
+      <aside class="sticky sticky-hint">
+        <p>Scroll &darr; to turn pages.</p>
+        <p>Black bars leak if you hover.</p>
+        <p class="sig">&mdash; Records</p>
+      </aside>
     </section>
 
     <!-- Page 2 -->
     <section class="sheet" id="introduction" aria-label="Page 2">
-      <p class="page-no">Page 2 of 15</p>
+      <p class="page-no" id="sheet-2">Page 2 of 15</p>
       <figure class="exhibit">
         <img src="images/surveillance-capture.jpg" alt="Surveillance photograph of Subject XT-1026 in human form: a man in glasses, a dark wool coat and a messenger bag walking along a snowy downtown Toronto sidewalk at night, glancing sideways, framed by red surveillance-camera corner marks">
-        <figcaption>Exhibit A. Surveillance capture, Field Office Toronto, 23:47. The subject appears unaware of the camera. Agents disagree on this point.<sup><a href="#sheet-8">1</a></sup></figcaption>
+        <figcaption>Exhibit A. Surveillance capture, Field Office Toronto, 23:47. The subject appears unaware of the camera.</figcaption>
       </figure>
+      <aside class="sticky sticky-exhibit-a">
+        <p>He WAVED at the camera.</p>
+        <p class="sig">&mdash; Ag. R</p>
+        <p class="reply">It was a stretch. &mdash; Ag. K</p>
+      </aside>
       <h2>Introduction</h2>
       <p>Subject XT-1026 is an extraterrestrial engineer currently residing in Toronto under the human alias S█m█n S█. To the casual observer, the subject is an ordinary graduate student who attends lectures, submits assignments, and carries a laptop at all times. Bureau analysts consider this an excellent disguise.</p>
     </section>
 
     <!-- Page 3 -->
     <section class="sheet" aria-label="Page 3">
-      <p class="page-no">Page 3 of 15</p>
+      <p class="page-no" id="sheet-3">Page 3 of 15</p>
       <h2>Introduction <span class="cont">(continued)</span></h2>
       <p>The subject has been under continuous observation since his arrival. In that time he has displayed no hostile intent, a remarkable tolerance for winter, and an ability to finish projects at hours most humans spend asleep. This brief summarizes what the Bureau is permitted to share at Clearance Level 1.</p>
       <p>The question the Bureau has been asked to answer is simple: who is this individual, and why should the public care? The short answer is that he is the first known visitor from our nearest neighbouring star. The long answer is classified.</p>
@@ -85,7 +113,7 @@
 
     <!-- Page 4 -->
     <section class="sheet" aria-label="Page 4">
-      <p class="page-no">Page 4 of 15</p>
+      <p class="page-no" id="sheet-4">Page 4 of 15</p>
       <h2>Origin Story <span class="cont">(continued)</span></h2>
       <p>Proxima b is tidally locked: one hemisphere faces its star in permanent, flare-scorched daylight, while the other lies in permanent frozen night. Life survives only along the narrow band between the two, a ring of endless dusk the inhabitants call the Hollow Line. Because the star unleashes violent radiation flares without warning, the native civilization, the Kethri, retreated underground long ago. Their cities are carved deep into basalt beneath the dusk, and every Kethri child learns to read flare warnings before learning to read.</p>
       <p>In Kethri society, the most honoured profession is that of Shelter Engineer, the individuals who design the burrows, doors, seats, and lamps that keep the population alive during a flare. The subject was a Shelter Engineer of the Third Burrow, regarded as gifted and, according to recovered records, &ldquo;tiresome about details.&rdquo;</p>
@@ -93,15 +121,19 @@
 
     <!-- Page 5 -->
     <section class="sheet" aria-label="Page 5">
-      <p class="page-no">Page 5 of 15</p>
+      <p class="page-no" id="sheet-5">Page 5 of 15</p>
       <h2>Origin Story <span class="cont">(continued)</span></h2>
-      <p>His career ended with what the Bureau refers to as the Comfort Incident. Tasked with redesigning the public flare shelters, the subject produced benches, lighting, and layouts so well considered that citizens declined to leave the shelters after the flare had passed. The planetary economy halted for <span class="redacted" tabindex="0">eleven</span> local years.<sup><a href="#sheet-8">2</a></sup> The Kethri Council ruled that the subject had made shelter too pleasant to escape, and sentenced him to exile.</p>
+      <p>His career ended with what the Bureau refers to as the Comfort Incident. Tasked with redesigning the public flare shelters, the subject produced benches, lighting, and layouts so well considered that citizens declined to leave the shelters after the flare had passed. The planetary economy halted for <span class="redacted" tabindex="0">eleven</span> local years. The Kethri Council ruled that the subject had made shelter too pleasant to escape, and sentenced him to exile.</p>
       <p>He was placed in a one-way transit pod and launched toward the nearest star with a habitable planet. The pod was recovered by Bureau agents at <span class="redacted" tabindex="0">a parking lot behind a hardware store</span> on the outskirts of the Greater Toronto Area. The subject was found sitting calmly beside it, reportedly asking where he might enroll in a graduate program.</p>
+      <aside class="sticky sticky-comfort">
+        <p>11 Proxima years &asymp; 4 Earth months. The Kethri still call it &ldquo;the Long Nap.&rdquo;</p>
+        <p class="sig">&mdash; Ag. ███</p>
+      </aside>
     </section>
 
     <!-- Page 6 -->
     <section class="sheet" id="abilities" aria-label="Page 6">
-      <p class="page-no">Page 6 of 15</p>
+      <p class="page-no" id="sheet-6">Page 6 of 15</p>
       <h2>Known Abilities</h2>
       <p>Confirmed by at least two independent field agents:</p>
       <ul>
@@ -116,7 +148,7 @@
 
     <!-- Page 7 -->
     <section class="sheet" id="threat" aria-label="Page 7">
-      <p class="page-no">Page 7 of 15</p>
+      <p class="page-no" id="sheet-7">Page 7 of 15</p>
       <div class="threat-panel">
         <h2>Threat Assessment</h2>
         <table>
@@ -144,7 +176,7 @@
 
     <!-- Page 8: hand-off to the Classified Annex -->
     <section class="sheet" id="handoff" aria-label="Page 8">
-      <p class="page-no">Page 8 of 15</p>
+      <p class="page-no" id="sheet-8">Page 8 of 15</p>
       <h2>End of Public Brief</h2>
       <p>The remainder of this case file is restricted. Agents holding Level 5 clearance may continue to the Classified Annex.</p>
       <div class="clearance-gate">
@@ -152,13 +184,6 @@
         <p><a href="classified.html">Request clearance and turn to page 9 &rarr;</a></p>
       </div>
 
-      <div class="field-notes" id="field-notes">
-        <h3>Field Agent Notes</h3>
-        <ol>
-          <li id="note-1">Agent ███ insists the subject waved at the camera. Agent ███ insists it was a stretch.</li>
-          <li id="note-2">A Proxima b year is about 11.2 Earth days, so the halt lasted roughly four Earth months. Hover over redactions to read them; this is a known flaw.</li>
-        </ol>
-      </div>
 
       <footer>
         <p>Property of the B.P.R.D. A fictional dossier created for DG8002, Master of Digital Media, Toronto Metropolitan University.</p>
@@ -167,18 +192,6 @@
 
   </main>
 
-  <!-- Invisible scroll track: one snap stop per sheet. Scrolling it drives the page flips. -->
-  <div class="track" aria-hidden="true">
-    <div class="stop" id="sheet-1"></div>
-    <div class="stop" id="sheet-2"></div>
-    <div class="stop" id="sheet-3"></div>
-    <div class="stop" id="sheet-4"></div>
-    <div class="stop" id="sheet-5"></div>
-    <div class="stop" id="sheet-6"></div>
-    <div class="stop" id="sheet-7"></div>
-    <div class="stop" id="sheet-8"></div>
-  </div>
 
-  <script src="script.js"></script>
 </body>
 </html>

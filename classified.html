@@ -6,13 +6,29 @@
   <title>Case File XT-1026 | Classified | B.P.R.D.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="gate.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body id="page-classified">
 
   <div class="board" aria-hidden="true"></div>
   <div class="clip" aria-hidden="true"></div>
+
+  <!-- Green banker's lamp on the desk. The switch on its brass base is the
+       light / dark theme toggle (script.js). -->
+  <div class="desk-lamp">
+    <img src="images/banker-lamp.svg" alt="" class="desk-lamp-art">
+    <button type="button" class="lamp-switch" id="lamp-switch" aria-pressed="true" title="Desk lamp switch">
+      <span class="visually-hidden">Desk lamp: <span id="lamp-state">On</span></span>
+    </button>
+  </div>
+
+  <!-- Field agent's pen: random fact generator (script.js) -->
+  <button type="button" class="pen" id="pen" aria-label="Field agent's pen: write a new observation about the subject on this page">
+    <span class="pen-body" aria-hidden="true"></span>
+  </button>
 
   <nav class="board-nav" aria-label="Case file navigation">
     <ul>
@@ -26,7 +42,7 @@
 
     <!-- Page 9 -->
     <section class="sheet" id="observations" aria-label="Page 9">
-      <p class="page-no">Page 9 of 15</p>
+      <p class="page-no" id="sheet-1">Page 9 of 15</p>
       <header>
         <div class="letterhead">
           <img src="images/bprd-seal.svg" alt="Circular seal of the Bureau for Paranormal Research and Defense, Extraterrestrial Division, with a five-pointed star at its centre">
@@ -44,28 +60,32 @@
       </header>
 
       <div class="access-banner" id="access-banner" role="note">
-        <p>ACCESS GRANTED. Clearance verified for Agent ███. This session is logged. Do not read this file aloud near the subject; his hearing is excellent.</p>
+        <p>ACCESS GRANTED. Clearance verified for Agent <span id="agent-name">███</span>. This session is logged. Do not read this file aloud near the subject; his hearing is excellent.</p>
       </div>
 
       <h2>Section 1: Field Observations</h2>
       <h3>Observation 1: The subject is technically very old</h3>
       <p>A year on Proxima b lasts about 11.2 Earth days. By Kethri reckoning, the subject has celebrated more than <span class="redacted" tabindex="0">one thousand</span> birthdays. He does not expect a cake for each of them, but he has not ruled it out.</p>
-      <p class="back-link"><a href="index.html#sheet-8">&larr; Back to page 8 (Public Brief)</a></p>
+      <p class="back-link"><a href="index.html#sheet-8" id="back-to-brief">&larr; Back to page 8 (Public Brief)</a></p>
     </section>
 
     <!-- Page 10 -->
     <section class="sheet" aria-label="Page 10">
-      <p class="page-no">Page 10 of 15</p>
+      <p class="page-no" id="sheet-2">Page 10 of 15</p>
       <h2>Section 1 <span class="cont">(continued)</span></h2>
       <h3>Observation 2: The subject enjoys Toronto winters</h3>
       <p>While human residents complain about the cold and the early darkness, the subject has been observed walking slowly through February evenings with visible contentment. Analysts believe the long nights remind him of home. One agent described his expression as &ldquo;suspiciously peaceful.&rdquo;</p>
       <h3>Observation 3: The subject rearranges rooms</h3>
-      <p>Within about forty minutes of entering any shared space, the subject will have moved at least one chair, table, or lamp to improve how people move through the room. Classmates rarely notice the change. They only notice that the room now feels better, which is exactly how the Comfort Incident began.<sup><a href="#sheet-7">A</a></sup></p>
+      <p>Within about forty minutes of entering any shared space, the subject will have moved at least one chair, table, or lamp to improve how people move through the room. Classmates rarely notice the change. They only notice that the room now feels better, which is exactly how the Comfort Incident began.</p>
+      <aside class="sticky sticky-room">
+        <p>He rearranged OUR interview room. Productivity +30%. Nobody has moved it back.</p>
+        <p class="sig">&mdash; Ag. ███</p>
+      </aside>
     </section>
 
     <!-- Page 11 -->
     <section class="sheet" id="survival-guide" aria-label="Page 11">
-      <p class="page-no">Page 11 of 15</p>
+      <p class="page-no" id="sheet-3">Page 11 of 15</p>
       <h2>Section 2: Survival Guide for Working With the Subject</h2>
       <p>Agents assigned to group projects with the subject must follow this procedure in order.</p>
       <ol>
@@ -81,7 +101,7 @@
 
     <!-- Page 12 -->
     <section class="sheet" id="weaknesses" aria-label="Page 12">
-      <p class="page-no">Page 12 of 15</p>
+      <p class="page-no" id="sheet-4">Page 12 of 15</p>
       <h2>Section 3: Greatest Weaknesses</h2>
       <p>Recorded here in case containment is ever required.</p>
       <ul>
@@ -94,7 +114,7 @@
 
     <!-- Page 13 -->
     <section class="sheet" id="ambitions" aria-label="Page 13">
-      <p class="page-no">Page 13 of 15</p>
+      <p class="page-no" id="sheet-5">Page 13 of 15</p>
       <h2>Section 4: Future Ambitions</h2>
       <p>Unconfirmed. Three analysts, three theories, and they have not spoken since.</p>
       <div class="theories">
@@ -116,28 +136,26 @@
 
     <!-- Page 14 -->
     <section class="sheet" id="homeworld" aria-label="Page 14">
-      <p class="page-no">Page 14 of 15</p>
+      <p class="page-no" id="sheet-6">Page 14 of 15</p>
       <h2>Section 5: Homeworld Reconstruction</h2>
       <figure>
         <img src="images/proxima-b-reconstruction.jpg" alt="Artist's reconstruction of Proxima b beside its flaring red star: the day side is cracked and glowing with molten orange fissures, the night side is dark and frozen, and a hazy violet dusk band between them is dotted with tiny lights from underground cities">
-        <figcaption>Exhibit B. Bureau reconstruction of Proxima b, showing the Hollow Line where the Kethri cities lie. Corrected by the subject <span class="redacted" tabindex="0">fourteen</span> times.</figcaption>
+        <figcaption>Exhibit B. Bureau reconstruction of Proxima b, showing the Hollow Line where the Kethri cities lie.</figcaption>
       </figure>
+      <aside class="sticky sticky-exhibit-b">
+        <p>He corrected this drawing 14 times.</p>
+        <p class="sig">&mdash; Bureau artist</p>
+      </aside>
     </section>
 
     <!-- Page 15 -->
     <section class="sheet" id="external" aria-label="Page 15">
-      <p class="page-no">Page 15 of 15</p>
+      <p class="page-no" id="sheet-7">Page 15 of 15</p>
       <h2>Section 6: External Intelligence</h2>
       <ul>
         <li><a href="https://www.seti.org/" target="_blank" rel="noopener noreferrer">The SETI Institute</a>: humanity&rsquo;s search for intelligent life. Looking in the right direction.</li>
         <li><a href="https://en.wikipedia.org/wiki/Proxima_Centauri_b" target="_blank" rel="noopener noreferrer">Proxima Centauri b reference entry</a>: notably incomplete.</li>
       </ul>
-      <div class="field-notes" id="field-notes">
-        <h3>Field Agent Notes</h3>
-        <ol type="A">
-          <li id="note-a">The subject rearranged the Bureau&rsquo;s own interview room during questioning. Productivity there has risen 30 percent. Nobody has moved the furniture back.</li>
-        </ol>
-      </div>
       <footer>
         <p>Property of the B.P.R.D. This document will not self-destruct. A fictional dossier for DG8002, Toronto Metropolitan University.</p>
       </footer>
@@ -145,16 +163,6 @@
 
   </main>
 
-  <div class="track" aria-hidden="true">
-    <div class="stop" id="sheet-1"></div>
-    <div class="stop" id="sheet-2"></div>
-    <div class="stop" id="sheet-3"></div>
-    <div class="stop" id="sheet-4"></div>
-    <div class="stop" id="sheet-5"></div>
-    <div class="stop" id="sheet-6"></div>
-    <div class="stop" id="sheet-7"></div>
-  </div>
 
-  <script src="script.js"></script>
 </body>
 </html>

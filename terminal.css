@@ -317,3 +317,75 @@ footer p { margin: 4px 0; }
 @media (prefers-reduced-motion: reduce) {
   body::after, .cursor { animation: none; }
 }
+
+/* ---------- Room lights toggle (script.js) ---------- */
+.lights-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--amber);
+  font: inherit;
+  text-shadow: inherit;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.lights-toggle::before { content: "[ "; color: var(--amber-dim); }
+.lights-toggle::after  { content: " ]"; color: var(--amber-dim); }
+
+.lights-toggle:hover,
+.lights-toggle:focus-visible {
+  background: var(--amber);
+  color: var(--screen);
+  text-shadow: none;
+  outline: none;
+}
+
+/* ---------- Agent greeting (script.js) ---------- */
+.login-message {
+  min-height: 1.5em;
+  margin: 14px 0 0;
+}
+
+.login-message.is-error {
+  color: var(--alert);
+  text-shadow: 0 0 5px rgba(255, 90, 54, 0.5);
+}
+
+.login-message.is-success { color: var(--ok); }
+
+input[aria-invalid="true"] { border-bottom-color: var(--alert); }
+
+.open-file { margin: 6px 0 0; }
+
+.is-hidden { display: none; }
+
+/* ---------- Room lights on: light theme ----------
+   script.js puts .theme-light on <html>; the terminal becomes a
+   printed readout on paper instead of an amber screen. */
+.theme-light {
+  --screen: #efe6cf;
+  --glass: #f8f2e2;
+  --amber: #4a3000;
+  --amber-dim: #8a6a2a;
+  --amber-faint: #d8c9a3;
+  --alert: #b3261e;
+  --ok: #5c3f00;
+  background: #d9cfb6;
+}
+
+.theme-light body { text-shadow: none; }
+.theme-light body::after { opacity: 0.25; animation: none; }
+.theme-light .title-bar img { filter: none; }
+.theme-light .denied,
+.theme-light .status-warn,
+.theme-light .login-message.is-error { text-shadow: none; }
+
+body { transition: background 0.4s ease, color 0.4s ease; }
+
+/* A case link refused before sign-in */
+a.is-denied {
+  color: var(--alert);
+  text-shadow: 0 0 5px rgba(255, 90, 54, 0.5);
+  text-decoration: none;
+}

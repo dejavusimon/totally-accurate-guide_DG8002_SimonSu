@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 540">
+  <!-- Classic green banker's lamp (front view): long glass shade with brass
+       end caps, curved brass arm, column and a round stepped base.
+       The switch on the base and the bulb glow are added by style.css. -->
+  <defs>
+    <linearGradient id="brass-side" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6b5320"/>
+      <stop offset="0.22" stop-color="#d9c27a"/>
+      <stop offset="0.4" stop-color="#f3e3a6"/>
+      <stop offset="0.62" stop-color="#b59a4c"/>
+      <stop offset="1" stop-color="#5a4417"/>
+    </linearGradient>
+    <linearGradient id="brass-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f5e7b0"/>
+      <stop offset="0.6" stop-color="#cdb262"/>
+      <stop offset="1" stop-color="#8f7430"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3fbf4a"/>
+      <stop offset="0.12" stop-color="#1f9a2c"/>
+      <stop offset="0.55" stop-color="#0b7a1c"/>
+      <stop offset="1" stop-color="#044d10"/>
+    </linearGradient>
+    <linearGradient id="glass-ends" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity="0.35"/>
+      <stop offset="0.12" stop-color="#000" stop-opacity="0"/>
+      <stop offset="0.88" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.4"/>
+    </linearGradient>
+    <linearGradient id="inside" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b2a1c"/>
+      <stop offset="1" stop-color="#5a5333"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <!-- Shadow on the desk -->
+  <ellipse cx="200" cy="514" rx="150" ry="18" fill="#000" opacity="0.5" filter="url(#soft)"/>
+
+  <!-- Base: wide bottom plate -->
+  <ellipse cx="190" cy="500" rx="130" ry="26" fill="#4d3a12"/>
+  <rect x="60" y="474" width="260" height="26" fill="url(#brass-side)"/>
+  <ellipse cx="190" cy="474" rx="130" ry="26" fill="url(#brass-top)"/>
+  <ellipse cx="190" cy="474" rx="116" ry="21" fill="none" stroke="#fff6cf" stroke-opacity="0.5" stroke-width="1.5"/>
+
+  <!-- Base: raised second step -->
+  <rect x="112" y="440" width="156" height="30" fill="url(#brass-side)"/>
+  <ellipse cx="190" cy="470" rx="78" ry="14" fill="#7a6226" opacity="0.6"/>
+  <ellipse cx="190" cy="440" rx="78" ry="15" fill="url(#brass-top)"/>
+
+  <!-- Column with collars -->
+  <rect x="166" y="282" width="48" height="156" fill="url(#brass-side)"/>
+  <ellipse cx="190" cy="438" rx="34" ry="8" fill="url(#brass-side)"/>
+  <rect x="160" y="276" width="60" height="14" rx="4" fill="url(#brass-side)"/>
+  <rect x="172" y="262" width="36" height="16" rx="4" fill="url(#brass-side)"/>
+  <circle cx="190" cy="256" r="10" fill="url(#brass-top)"/>
+
+  <!-- Curved arm up to the shade -->
+  <path d="M190 254 C 186 214, 214 196, 212 150 L 212 130" fill="none" stroke="#7a6226" stroke-width="14" stroke-linecap="round"/>
+  <path d="M190 254 C 186 214, 214 196, 212 150 L 212 130" fill="none" stroke="#e6d08a" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Inside of the shade (warm glow added by style.css when on) -->
+  <path d="M30 118 Q 190 146 350 118 L 350 128 Q 190 160 30 128 Z" fill="url(#inside)"/>
+
+  <!-- Green glass shade -->
+  <path d="M22 122 L 22 72 Q 22 24 74 20 L 306 20 Q 358 24 358 72 L 358 122 Q 190 150 22 122 Z" fill="url(#glass)"/>
+  <path d="M22 122 L 22 72 Q 22 24 74 20 L 306 20 Q 358 24 358 72 L 358 122 Q 190 150 22 122 Z" fill="url(#glass-ends)"/>
+  <!-- Gloss highlights -->
+  <path d="M60 40 Q 190 30 320 40" fill="none" stroke="#c9ffd0" stroke-opacity="0.55" stroke-width="6" stroke-linecap="round"/>
+  <path d="M40 70 L 40 105" stroke="#c9ffd0" stroke-opacity="0.25" stroke-width="5" stroke-linecap="round"/>
+  <!-- Brass rim along the bottom edge -->
+  <path d="M22 122 Q 190 150 358 122" fill="none" stroke="#d6bd6c" stroke-width="4"/>
+
+  <!-- Brass end caps -->
+  <g fill="url(#brass-top)" stroke="#6b5320" stroke-width="1.5">
+    <rect x="6" y="58" width="22" height="34" rx="9"/>
+    <rect x="352" y="58" width="22" height="34" rx="9"/>
+  </g>
+  <circle cx="17" cy="75" r="5" fill="#8f7430"/>
+  <circle cx="363" cy="75" r="5" fill="#8f7430"/>
+</svg>
