@@ -761,7 +761,9 @@ footer p { margin: 0; }
      a 14.5 cm ballpoint beside 27.9 cm letter paper is 0.52 of the sheet.
      Like the lamp, its gap from the clipboard follows the free desk space. */
   .pen {
-    --pen-len: calc(var(--sheet-h) * 0.52);
+    /* Real size when the desk has room; otherwise as long as fits beside
+       the clipboard (its tilted footprint is about half its length) */
+    --pen-len: min(var(--sheet-h) * 0.52, (var(--desk-free) - var(--lamp-gap)) * 2 - 24px);
     --pen-rot: -64deg;
     top: calc(var(--top) + var(--sheet-h) * 0.5);
     bottom: auto;

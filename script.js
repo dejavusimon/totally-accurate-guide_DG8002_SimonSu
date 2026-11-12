@@ -394,7 +394,9 @@ if (isDossier) {
   // --- Keyboard ---
   window.addEventListener("keydown", (event) => {
     if (!clipboardQuery.matches) return;
-    const typingTarget = event.target.closest("input, textarea, button, a");
+    const typingTarget = event.target instanceof Element
+      ? event.target.closest("input, textarea, button, a")
+      : null;
     if (typingTarget && event.key === " ") return;   // Space still presses buttons
 
     if (["ArrowDown", "PageDown", " "].includes(event.key)) {
