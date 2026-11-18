@@ -94,10 +94,14 @@ if (isDossier) {
    file opened. Nothing moves on to the next step by itself.
    ===================================================================== */
 
-// Cleared earlier in this visit? (gate.js checks the same value)
-let isCleared = Boolean(readStored("bprd-agent", "session"));
-
 const loginForm = document.getElementById("login-form");
+
+// Opening the Records Terminal signs the agent out, so the three checks
+// always run again before the case file opens. (gate.js reads this value.)
+if (loginForm) {
+  try { sessionStorage.removeItem("bprd-agent"); } catch (error) { /* nothing saved */ }
+}
+let isCleared = Boolean(readStored("bprd-agent", "session"));
 
 if (loginForm) {
   const nameInput = document.getElementById("agent-name-input");
@@ -177,18 +181,8 @@ if (loginForm) {
 
   /* ----- Check 3: open the case file -> visual checks ----- */
   openFile.addEventListener("click", () => {
-    if (isCleared) {                        // already cleared this visit
-      window.location.href = "index.html";
-      return;
-    }
     if (checks.authenticated && checks.human) openFruit();
   });
-
-  // Returning later in the same visit: clearance is already on file
-  if (isCleared) {
-    showLoginMessage(`Clearance on file for Agent ${readStored("bprd-agent", "session")}.`, "ok");
-    openFile.classList.remove("is-hidden");
-  }
 
   /* ----- Case links: locked until cleared; directory links always locked ----- */
   const caseLinks = document.querySelectorAll('a[href^="index.html"], a[href^="classified.html"]');
