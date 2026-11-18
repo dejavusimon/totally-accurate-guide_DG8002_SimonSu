@@ -8,7 +8,7 @@
    4. Clipboard mode: board, clip and page flip (tablet / desktop;
       script.js adds the .is-flipped / .is-current classes)
    5. Page turn between the two files (View Transitions)
-   6. Desk lamp lighting: spotlight on / lights off (.theme-dark)
+   6. Desk lamp lighting: lamp on / lights off with flashlight (.theme-dark)
    7. Reduced motion and phones
    ===================================================================== */
 
@@ -1026,10 +1026,25 @@ body::before {
   opacity: 1;
 }
 
-/* Lamp off: the room goes dark */
+/* Lamp off: the room goes dark, except where the flashlight points.
+   script.js moves --mx / --my with the mouse. */
+:root {
+  --mx: 50%;
+  --my: 45%;
+  --beam: 170px;
+}
+
 body::after {
-  background: rgba(6, 7, 16, 0.68);
+  background: radial-gradient(circle var(--beam) at var(--mx) var(--my),
+    rgba(255, 238, 200, 0.10) 0%,
+    rgba(255, 238, 200, 0.04) 55%,
+    rgba(5, 6, 14, 0.95) 100%);
   opacity: 0;
+}
+
+/* Before the mouse moves, or after it leaves the window: no beam */
+.flashlight-away body::after {
+  background: rgba(5, 6, 14, 0.95);
 }
 
 .theme-dark body::before { opacity: 0; }
@@ -1042,6 +1057,9 @@ body::after {
 /* Clipboard mode: light comes from the lamp in the upper-left corner */
 @media (min-width: 760px) and (min-height: 560px) {
   :root {
+    /* Flashlight beam scales with the clipboard */
+    --beam: calc(var(--sheet-h) * 0.2);
+
     /* Light comes from just under the shade */
     --lamp-x: calc(var(--desk-free) - var(--lamp-gap) - var(--lamp-w) * 0.5);
     --lamp-y: calc(var(--top) + var(--sheet-h) * 0.04 + var(--lamp-w) * 0.38);

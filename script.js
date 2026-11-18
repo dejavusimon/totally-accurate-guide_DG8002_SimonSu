@@ -3,8 +3,8 @@
    Loaded with `defer` by system.html, index.html and classified.html,
    so every HTML element already exists when this code runs.
 
-   1. Desk lamp: light / dark theme toggle      (all pages)
-   2. Agent greeting with validation             (Records Terminal)
+   1. Lighting: room lights (terminal) and desk lamp + flashlight (dossier)
+   2. Records Terminal: three-step sign-in, fruit picker, knight's mate
    3. Field agent's pen: random fact generator   (dossier pages)
    4. Clipboard page turning                     (dossier pages)
    ===================================================================== */
@@ -14,33 +14,38 @@
 
 // Browser storage can be blocked (private windows, strict settings),
 // so every read and write is wrapped and simply does nothing if it fails.
-function readStored(key) {
-  try { return localStorage.getItem(key); } catch (error) { return null; }
+function readStored(key, store = "local") {
+  try { return window[store + "Storage"].getItem(key); } catch (error) { return null; }
 }
 
-function writeStored(key, value) {
-  try { localStorage.setItem(key, value); } catch (error) { /* not saved */ }
+function writeStored(key, value, store = "local") {
+  try { window[store + "Storage"].setItem(key, value); } catch (error) { /* not saved */ }
 }
 
-const isTerminal = document.body.classList.contains("terminal-page") ||
-                   document.querySelector(".terminal") !== null;
+const isTerminal = document.querySelector(".terminal") !== null;
 const isDossier = document.querySelector(".stack") !== null;
+const root = document.documentElement;
 
 
 /* =====================================================================
-   1. Desk lamp: light / dark theme
-   The dossier is naturally lit (light) and the terminal is naturally dark.
-   Clicking the switch adds or removes a theme class on <html>; style.css
-   and terminal.css restyle everything from that one class. The choice is
-   remembered, so it carries across all three pages.
+   1. Lighting
+   Terminal: "Room lights" switch, dark by default, remembered.
+   Dossier: the desk lamp starts OFF at the start of every visit, and a
+   flashlight follows the mouse until the visitor finds the lamp switch.
+   Touch screens have no mouse to aim with, so there the lamp starts ON.
+   Switching the lamp on turns the flashlight off.
    ===================================================================== */
 
 const lampSwitch = document.getElementById("lamp-switch");
 const lampState = document.getElementById("lamp-state");
-const defaultTheme = isTerminal ? "dark" : "light";
+const isTouchOnly = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+// Where each page keeps its light setting
+const lightKey = isTerminal ? "bprd-room-lights" : "bprd-desk-lamp";
+const lightStore = isTerminal ? "local" : "session";     // lamp resets each visit
+const defaultTheme = isTerminal || !isTouchOnly ? "dark" : "light";
 
 function applyTheme(theme) {
-  const root = document.documentElement;
   root.classList.toggle("theme-dark", theme === "dark");
   root.classList.toggle("theme-light", theme === "light");
 
@@ -51,82 +56,148 @@ function applyTheme(theme) {
   }
 }
 
-let currentTheme = readStored("bprd-theme") || defaultTheme;
+let currentTheme = readStored(lightKey, lightStore) || defaultTheme;
 applyTheme(currentTheme);
 
 if (lampSwitch) {
   lampSwitch.addEventListener("click", () => {
     currentTheme = currentTheme === "dark" ? "light" : "dark";
     applyTheme(currentTheme);
-    writeStored("bprd-theme", currentTheme);
+    writeStored(lightKey, currentTheme, lightStore);
   });
+}
+
+// Flashlight: the dark layer in style.css has a hole at --mx / --my
+if (isDossier) {
+  root.classList.add("flashlight-away");          // dark until the mouse moves
+
+  document.addEventListener("pointermove", (event) => {
+    if (currentTheme !== "dark") return;          // lamp on: no flashlight
+    root.style.setProperty("--mx", event.clientX + "px");
+    root.style.setProperty("--my", event.clientY + "px");
+    root.classList.remove("flashlight-away");
+  });
+
+  // Mouse leaves the window: the beam goes with it
+  root.addEventListener("pointerleave", () => root.classList.add("flashlight-away"));
 }
 
 
 /* =====================================================================
-   2. Agent greeting (Records Terminal)
-   Reads the name typed into the login form, refuses blank entries,
-   and greets the agent on the page without reloading.
+   2. Records Terminal sign-in
+   Check 1: type an agent name and AUTHENTICATE (or press Enter).
+   Check 2: tick "I am not a robot".
+   Check 3: OPEN CASE FILE opens two visual checks in turn:
+            select the 4 oranges among 5 look-alike apples, then
+            checkmate in one with a knight (hint after 3 failed tries).
+   Only after all of that is the agent's clearance saved and the case
+   file opened. Nothing moves on to the next step by itself.
    ===================================================================== */
 
-const loginForm = document.getElementById("login-form");
+// Cleared earlier in this visit? (gate.js checks the same value)
+let isCleared = Boolean(readStored("bprd-agent", "session"));
 
-// Signed in during this visit? (also remembered for the other pages)
-let isAuthenticated = false;
-try { isAuthenticated = Boolean(sessionStorage.getItem("bprd-agent")); } catch (error) { /* no */ }
+const loginForm = document.getElementById("login-form");
 
 if (loginForm) {
   const nameInput = document.getElementById("agent-name-input");
   const loginMessage = document.getElementById("login-message");
+  const humanBox = document.getElementById("human-box");
   const openFile = document.getElementById("open-file");
 
-  function showLoginError(message) {
-    loginMessage.textContent = message;
-    loginMessage.classList.add("is-error");
-    loginMessage.classList.remove("is-success");
-    nameInput.setAttribute("aria-invalid", "true");
+  // Progress through the three checks
+  const checks = { agentName: "", authenticated: false, human: false };
+
+  function showLoginMessage(text, kind) {
+    loginMessage.textContent = text;
+    loginMessage.classList.toggle("is-error", kind === "error");
+    loginMessage.classList.toggle("is-success", kind === "ok");
   }
 
+  function resetHumanBox() {
+    checks.human = false;
+    humanBox.classList.remove("is-checked", "is-loading");
+    humanBox.setAttribute("aria-checked", "false");
+    openFile.classList.add("is-hidden");
+  }
+
+  /* ----- Check 1: agent name ----- */
   loginForm.addEventListener("submit", (event) => {
     event.preventDefault();                 // stay on this page
     const agentName = nameInput.value.trim();
 
     if (agentName === "") {
       // Validation: nothing (or only spaces) was entered
-      showLoginError("ACCESS DENIED: agent name required.");
-      openFile.classList.add("is-hidden");
+      showLoginMessage("ACCESS DENIED: agent name required.", "error");
+      nameInput.setAttribute("aria-invalid", "true");
       nameInput.focus();
       return;
     }
 
+    checks.agentName = agentName;
+    checks.authenticated = true;
+    nameInput.removeAttribute("aria-invalid");
     // textContent (not innerHTML) so typed text is always shown as plain text
-    loginMessage.textContent = `ACCESS GRANTED. Welcome back, Agent ${agentName}. Case file XT-1026 is unlocked.`;
-    loginMessage.classList.add("is-success");
-    loginMessage.classList.remove("is-error");
-    nameInput.removeAttribute("aria-invalid");
-    openFile.classList.remove("is-hidden");
-    isAuthenticated = true;
-
-    // Remember the name for this visit, so the dossier pages let them in
-    try { sessionStorage.setItem("bprd-agent", agentName); } catch (error) { /* not saved */ }
+    showLoginMessage(checks.human
+      ? `Welcome back, Agent ${agentName}. Open the case file when ready.`
+      : `Welcome back, Agent ${agentName}. Confirm you are human to continue.`, "ok");
   });
 
-  // Clear the error as soon as they start typing again
   nameInput.addEventListener("input", () => {
-    loginMessage.classList.remove("is-error");
     nameInput.removeAttribute("aria-invalid");
+    if (checks.authenticated && nameInput.value.trim() !== checks.agentName) {
+      // A different name has to go through the checks again
+      checks.authenticated = false;
+      resetHumanBox();
+      showLoginMessage("Name changed. Authenticate again.");
+    } else if (loginMessage.classList.contains("is-error")) {
+      showLoginMessage("");
+    }
   });
 
-  // Case file links refuse to open until the agent has signed in
+  /* ----- Check 2: "I am not a robot" ----- */
+  humanBox.addEventListener("click", () => {
+    if (checks.human || humanBox.classList.contains("is-loading")) return;
+    if (!checks.authenticated) {
+      showLoginMessage("ACCESS DENIED: authenticate your agent name first.", "error");
+      nameInput.focus();
+      return;
+    }
+    humanBox.classList.add("is-loading");
+    showLoginMessage("Checking…");
+    setTimeout(() => {
+      humanBox.classList.remove("is-loading");
+      humanBox.classList.add("is-checked");
+      humanBox.setAttribute("aria-checked", "true");
+      checks.human = true;
+      openFile.classList.remove("is-hidden");
+      showLoginMessage("Humanity confirmed. Case file XT-1026 is ready.", "ok");
+    }, 900);
+  });
+
+  /* ----- Check 3: open the case file -> visual checks ----- */
+  openFile.addEventListener("click", () => {
+    if (isCleared) {                        // already cleared this visit
+      window.location.href = "index.html";
+      return;
+    }
+    if (checks.authenticated && checks.human) openFruit();
+  });
+
+  // Returning later in the same visit: clearance is already on file
+  if (isCleared) {
+    showLoginMessage(`Clearance on file for Agent ${readStored("bprd-agent", "session")}.`, "ok");
+    openFile.classList.remove("is-hidden");
+  }
+
+  /* ----- Case links: locked until cleared; directory links always locked ----- */
   const caseLinks = document.querySelectorAll('a[href^="index.html"], a[href^="classified.html"]');
 
   caseLinks.forEach((link) => {
-    // The Case Directory's OPEN FILE / OPEN ANNEX links are always locked;
-    // signed-in agents enter through "OPEN CASE FILE XT-1026" instead.
     const alwaysLocked = link.closest("#directory") !== null;
 
     link.addEventListener("click", (event) => {
-      if (isAuthenticated && !alwaysLocked) return;   // signed in: open the file
+      if (isCleared && !alwaysLocked) return;   // cleared: open the file
       event.preventDefault();
 
       // The link itself reads ACCESS DENIED for a moment
@@ -139,21 +210,305 @@ if (loginForm) {
         link.classList.remove("is-denied");
       }, 1800);
 
-      if (isAuthenticated) {
-        showLoginError("ACCESS DENIED: directory links are locked. Use OPEN CASE FILE XT-1026 above.");
-        nameInput.removeAttribute("aria-invalid");
-      } else {
-        showLoginError("ACCESS DENIED: enter your agent name to open case files.");
-        nameInput.focus();
-      }
+      showLoginMessage(isCleared
+        ? "ACCESS DENIED: directory links are locked. Use OPEN CASE FILE XT-1026 above."
+        : "ACCESS DENIED: complete the agent checks to open case files.", "error");
+      if (!isCleared) nameInput.focus();
     });
   });
 
-  // Sent here from a case file page without signing in
-  if (window.location.hash === "#clearance-required" && !isAuthenticated) {
-    showLoginError("CLEARANCE REQUIRED: enter your agent name to open case files.");
-    nameInput.removeAttribute("aria-invalid");
+  // Sent here from a case file page without clearance
+  if (window.location.hash === "#clearance-required" && !isCleared) {
+    showLoginMessage("CLEARANCE REQUIRED: complete the agent checks to open case files.", "error");
   }
+
+  /* ----- Shared helpers for the two challenge windows ----- */
+  function openWindow(wrap, focusTarget) {
+    wrap.classList.remove("is-hidden");
+    if (focusTarget) focusTarget.focus();
+  }
+
+  function closeWindow(wrap) {
+    wrap.classList.add("is-hidden");
+    openFile.focus();
+  }
+
+  function shake(card) {
+    card.classList.remove("shake");
+    void card.offsetWidth;                  // restart the animation
+    card.classList.add("shake");
+  }
+
+  function shuffle(list) {
+    const copy = list.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  /* ===== Visual check 1: select the oranges ===== */
+  const fruitWrap = document.getElementById("fruit-wrap");
+  const fruitCard = document.getElementById("fruit-card");
+  const fruitGrid = document.getElementById("fruit-grid");
+  const fruitMsg = document.getElementById("fruit-msg");
+
+  const orangePhotos = [1, 2, 3, 4, 5, 6].map((n) => `images/captcha/orange-${n}.jpg`);
+  const applePhotos = [1, 2, 3, 4, 5, 6].map((n) => `images/captcha/apple-${n}.jpg`);
+  const fruit = { tiles: [], selected: new Set(), attempts: 0 };
+
+  function buildFruitGrid() {
+    // 4 of the 6 orange photos and 5 of the 6 apple photos, shuffled together
+    fruit.tiles = shuffle([
+      ...shuffle(orangePhotos).slice(0, 4).map((src) => ({ kind: "orange", src })),
+      ...shuffle(applePhotos).slice(0, 5).map((src) => ({ kind: "apple", src }))
+    ]);
+    fruit.selected.clear();
+
+    fruitGrid.innerHTML = "";               // remove the previous tiles
+    fruit.tiles.forEach((tile, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "tile";
+      button.setAttribute("aria-pressed", "false");
+      button.setAttribute("aria-label", `Image ${index + 1}`);
+      const img = document.createElement("img");
+      img.src = tile.src;
+      img.alt = "";
+      button.appendChild(img);
+      button.addEventListener("click", () => {
+        if (fruit.selected.has(index)) fruit.selected.delete(index);
+        else fruit.selected.add(index);
+        button.setAttribute("aria-pressed", String(fruit.selected.has(index)));
+        fruitMsg.textContent = "";
+      });
+      fruitGrid.appendChild(button);
+    });
+  }
+
+  function openFruit() {
+    buildFruitGrid();
+    fruitMsg.textContent = "";
+    fruitMsg.className = "challenge-msg";
+    openWindow(fruitWrap, fruitGrid.querySelector(".tile"));
+  }
+
+  document.getElementById("fruit-new").addEventListener("click", buildFruitGrid);
+
+  document.getElementById("fruit-verify").addEventListener("click", () => {
+    if (fruit.selected.size === 0) {
+      fruitMsg.textContent = "Please select all images with oranges.";
+      return;
+    }
+    const picked = [...fruit.selected].map((index) => fruit.tiles[index].kind);
+    const apples = picked.filter((kind) => kind === "apple").length;
+    const oranges = picked.length - apples;
+
+    if (apples > 0 || oranges < 4) {
+      fruit.attempts++;
+      fruitMsg.textContent = apples
+        ? `${apples} of those ${apples === 1 ? "is an apple" : "are apples"}. Try again.`
+        : "You missed some oranges. Try again.";
+      shake(fruitCard);
+      setTimeout(buildFruitGrid, 900);      // new pictures for the next try
+      return;
+    }
+
+    fruitMsg.textContent = "Correct.";
+    fruitMsg.classList.add("is-ok");
+    setTimeout(() => {
+      fruitWrap.classList.add("is-hidden");
+      showLoginMessage("Visual check passed. One final check…", "ok");
+      openChess();
+    }, 500);
+  });
+
+  /* ===== Visual check 2: checkmate in one with a knight ===== */
+  // Position checked with a chess engine: White to move, and Knight e5 to f7
+  // (a smothered mate) is the only checkmate in one on the board.
+  const START = {
+    a8: "bR", c8: "bB", g8: "bR", h8: "bK",
+    a7: "bP", b7: "bP", g7: "bP", h7: "bP",
+    b6: "bQ", e5: "wN", d4: "wN",
+    a2: "wP", b2: "wP", f2: "wP", g2: "wP", h2: "wP",
+    c1: "wB", d1: "wR", g1: "wK"
+  };
+  const GLYPHS = { K: "\u265A", Q: "\u265B", R: "\u265C", B: "\u265D", N: "\u265E", P: "\u265F" };
+  const NAMES = { K: "king", Q: "queen", R: "rook", B: "bishop", N: "knight", P: "pawn" };
+  const FILES = "abcdefgh";
+  const MATE = { from: "e5", to: "f7" };
+  const HINT_AFTER = 3;                     // failed attempts before the hint
+  const WRONG_MOVES = {
+    "e5-g6": "Check, but the h7 pawn (or the queen) captures the knight. Try again.",
+    "e5-d7": "That attacks the queen, but it isn't check. Try again."
+  };
+
+  const chessWrap = document.getElementById("chess-wrap");
+  const chessCard = document.getElementById("chess-card");
+  const boardEl = document.getElementById("board");
+  const chessMsg = document.getElementById("chess-msg");
+  const chess = { board: {}, selected: null, solved: false, failures: 0 };
+
+  function knightTargets(square) {
+    const file = FILES.indexOf(square[0]);
+    const rank = Number(square[1]);
+    const jumps = [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]];
+    return jumps
+      .map(([df, dr]) => [file + df, rank + dr])
+      .filter(([f, r]) => f >= 0 && f < 8 && r >= 1 && r <= 8)
+      .map(([f, r]) => FILES[f] + r)
+      .filter((target) => !(chess.board[target] || "").startsWith("w"));
+  }
+
+  function drawBoard() {
+    boardEl.innerHTML = "";                 // rebuild all 64 squares
+    for (let rank = 8; rank >= 1; rank--) {
+      for (let f = 0; f < 8; f++) {
+        const square = FILES[f] + rank;
+        const piece = chess.board[square];
+        const cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "sq " + ((f + rank) % 2 ? "sq-dark" : "sq-light");   // a1 is dark
+        cell.dataset.sq = square;
+        if (rank === 1) cell.dataset.file = FILES[f];
+        if (f === 0) cell.dataset.rank = rank;
+        cell.setAttribute("aria-label", square + (piece
+          ? ` ${piece[0] === "w" ? "white" : "black"} ${NAMES[piece[1]]}` : ""));
+
+        if (piece) {
+          const glyph = document.createElement("span");
+          glyph.className = "piece " + (piece[0] === "w" ? "white" : "black");
+          glyph.textContent = GLYPHS[piece[1]];
+          cell.appendChild(glyph);
+        }
+        if (piece === "wN" && !chess.solved) {
+          cell.classList.add("movable");
+          cell.draggable = true;
+        }
+        if (square === MATE.from && piece === "wN" && !chess.solved && chess.failures >= HINT_AFTER) {
+          cell.classList.add("hint");
+        }
+        if (chess.selected === square) cell.classList.add("selected");
+        if (chess.selected && knightTargets(chess.selected).includes(square)) {
+          cell.classList.add("target");
+          if (piece) cell.classList.add("capture");
+          const dot = document.createElement("span");
+          dot.className = "dot";
+          cell.appendChild(dot);
+        }
+        boardEl.appendChild(cell);
+      }
+    }
+  }
+
+  function showHint() {
+    chessMsg.className = "challenge-msg is-hint";
+    chessMsg.textContent = "Hint: the glowing knight delivers the mate. Where can it attack the king?";
+  }
+
+  function openChess() {
+    chess.board = { ...START };
+    chess.selected = null;
+    chess.solved = false;
+    chessMsg.className = "challenge-msg";
+    chessMsg.textContent = "";
+    drawBoard();
+    if (chess.failures >= HINT_AFTER) showHint();
+    openWindow(chessWrap, boardEl.querySelector(".movable"));
+  }
+
+  function tryMove(from, to) {
+    if (chess.solved || chess.board[from] !== "wN" || !knightTargets(from).includes(to)) return;
+    chess.board[to] = "wN";                 // show the move on the board
+    delete chess.board[from];
+    chess.selected = null;
+
+    if (from === MATE.from && to === MATE.to) {
+      chess.solved = true;
+      drawBoard();
+      boardEl.querySelector('[data-sq="h8"]').classList.add("mated");
+      chessMsg.className = "challenge-msg is-ok";
+      chessMsg.textContent = "Nf7#. Smothered mate. Clearance granted.";
+
+      // All checks passed: save clearance for this visit and open the file
+      writeStored("bprd-agent", checks.agentName, "session");
+      isCleared = true;
+      setTimeout(() => {
+        chessWrap.classList.add("is-hidden");
+        showLoginMessage(`ACCESS GRANTED. Opening case file XT-1026, Agent ${checks.agentName}…`, "ok");
+        setTimeout(() => { window.location.href = "index.html"; }, 900);
+      }, 1400);
+      return;
+    }
+
+    chess.failures++;
+    drawBoard();
+    boardEl.querySelector(`[data-sq="${to}"]`).classList.add("wrong");
+    chessMsg.className = "challenge-msg";
+    chessMsg.textContent = WRONG_MOVES[`${from}-${to}`] || "That isn't checkmate. Try again.";
+    shake(chessCard);
+    setTimeout(() => {                      // put the knight back
+      chess.board = { ...START };
+      drawBoard();
+      if (chess.failures >= HINT_AFTER) showHint();
+    }, 1200);
+  }
+
+  // Click a knight, then click one of its highlighted squares
+  boardEl.addEventListener("click", (event) => {
+    const cell = event.target.closest(".sq");
+    if (!cell || chess.solved) return;
+    const square = cell.dataset.sq;
+    if (chess.board[square] === "wN") {
+      chess.selected = chess.selected === square ? null : square;
+      drawBoard();
+      boardEl.querySelector(`[data-sq="${square}"]`).focus();
+    } else if (chess.selected) {
+      tryMove(chess.selected, square);
+    }
+  });
+
+  // Or drag a knight onto a square
+  boardEl.addEventListener("dragstart", (event) => {
+    const cell = event.target.closest(".sq");
+    if (!cell || chess.board[cell.dataset.sq] !== "wN") return;
+    event.dataTransfer.setData("text/plain", cell.dataset.sq);
+    chess.selected = cell.dataset.sq;
+    setTimeout(drawBoard, 0);               // show its target squares
+  });
+
+  boardEl.addEventListener("dragover", (event) => {
+    const cell = event.target.closest(".sq");
+    if (cell && chess.selected && knightTargets(chess.selected).includes(cell.dataset.sq)) {
+      event.preventDefault();               // allow dropping here
+      boardEl.querySelectorAll(".drag-over").forEach((c) => c.classList.remove("drag-over"));
+      cell.classList.add("drag-over");
+    }
+  });
+
+  boardEl.addEventListener("drop", (event) => {
+    event.preventDefault();
+    const cell = event.target.closest(".sq");
+    const from = event.dataTransfer.getData("text/plain");
+    if (cell && from) tryMove(from, cell.dataset.sq);
+  });
+
+  boardEl.addEventListener("dragend", () => {
+    if (!chess.solved && chess.selected) {
+      chess.selected = null;
+      drawBoard();
+    }
+  });
+
+  document.getElementById("chess-reset").addEventListener("click", openChess);
+
+  // Escape closes either challenge window (the checks restart from OPEN CASE FILE)
+  [fruitWrap, chessWrap].forEach((wrap) => {
+    wrap.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeWindow(wrap);
+    });
+  });
 }
 
 // Classified Annex: show the signed-in agent's name in the access banner

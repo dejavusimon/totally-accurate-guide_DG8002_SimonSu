@@ -50,18 +50,28 @@
         <h2>Agent Authentication</h2>
         <div class="login-grid">
           <form id="login-form" autocomplete="off" novalidate>
+            <!-- Check 1: agent name -->
             <div class="field">
               <label for="agent-name-input">Agent name</label>
               <input type="text" id="agent-name-input" name="agent-name" maxlength="40" placeholder="e.g. Mulder" aria-describedby="login-message">
             </div>
             <button type="submit">AUTHENTICATE &gt;</button>
+
+            <!-- Check 2: humanity checkbox -->
+            <div class="human-check">
+              <button type="button" class="check-box" id="human-box" role="checkbox" aria-checked="false" aria-label="I am not a robot"></button>
+              <span class="human-label">I am not a robot<br><small>(or a Kethri)</small></span>
+              <span class="check-brand"><span class="check-seal" aria-hidden="true"></span>B.P.R.D.<br>HUMANITY CHECK</span>
+            </div>
+
             <p id="login-message" class="login-message" role="status" aria-live="polite"></p>
-            <p class="open-file is-hidden" id="open-file"><a class="open-link" href="index.html">OPEN CASE FILE XT-1026 &gt;</a></p>
+            <!-- Check 3 starts here: opens the fruit picker, then the knight's mate -->
+            <button type="button" class="open-file-btn is-hidden" id="open-file">OPEN CASE FILE XT-1026 &gt;</button>
           </form>
           <div class="login-notice">
             <p>NOTICE: This terminal is restricted to Bureau personnel. Every login attempt is logged and reviewed.</p>
-            <p>Passphrases were discontinued in 1987, after an agent forgot his. Your name is now considered sufficient.</p>
-            <p>Agents in training must still enter a name. Blank entries are refused.</p>
+            <p>Three checks are required: authenticate your name, confirm you are human, then pass the visual checks when you open the case file.</p>
+            <p>Recent intelligence suggests a Kethri may be attempting to sign in.</p>
           </div>
         </div>
       </section>
@@ -137,5 +147,40 @@
     </footer>
 
   </div>
+  <!-- Visual check 1: select the oranges (tiles are built by script.js) -->
+  <div class="modal-backdrop is-hidden" id="fruit-wrap">
+    <div class="challenge" id="fruit-card" role="dialog" aria-modal="true" aria-labelledby="fruit-title">
+      <div class="challenge-head">
+        <p>Select all images with</p>
+        <p class="challenge-big" id="fruit-title">oranges</p>
+        <p>Some apples from Proxima b are disguised as oranges.</p>
+      </div>
+      <div class="fruit-grid" id="fruit-grid"></div>
+      <div class="challenge-foot">
+        <button type="button" class="icon-btn" id="fruit-new" aria-label="Get a new set of images" title="New images">&#8635;</button>
+        <p class="challenge-msg" id="fruit-msg" role="status" aria-live="polite"></p>
+        <button type="button" class="verify-btn" id="fruit-verify">Verify</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visual check 2: checkmate in one with a knight (board is built by script.js) -->
+  <div class="modal-backdrop is-hidden" id="chess-wrap">
+    <div class="challenge" id="chess-card" role="dialog" aria-modal="true" aria-labelledby="chess-title">
+      <div class="challenge-head">
+        <p>Final check &middot; White to move</p>
+        <p class="challenge-big" id="chess-title">Checkmate in one with a knight</p>
+        <p>Drag a white knight, or click it and then click a square.</p>
+      </div>
+      <div class="board-wrap">
+        <div class="board" id="board" aria-label="Chess board"></div>
+      </div>
+      <div class="challenge-foot">
+        <button type="button" class="icon-btn" id="chess-reset" aria-label="Reset the board" title="Reset board">&#8635;</button>
+        <p class="challenge-msg" id="chess-msg" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
